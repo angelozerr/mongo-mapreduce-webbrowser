@@ -1,0 +1,82 @@
+$(function() {
+	
+	// Button click on New MapReduce open the dialog
+	$( "#new_mapreduce" )
+      .button()
+      .click(function() {
+        $( "#dialog_new_mapreduce" ).dialog( "open" );
+    });	
+	
+	var tabCount = 0;
+	var tabs = null;
+	var openTab = function(executor) {
+		if (tabs == null) {
+			tabs= $("#tabs").tabs();
+		}
+		var label = executor.name;
+		var tabId = "tabs-" + (tabCount++);
+		
+		var li= "<li><a href='#"+ tabId + "'>" + label + "</a> <span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>"
+		tabs.find(".ui-tabs-nav").append(li);
+				
+		var tabContent = document.createElement('div');
+		tabContent.id = tabId;
+		
+		executor.loadUI(tabContent);
+				
+		tabs.append(tabContent);
+		tabs.tabs("refresh");	
+		
+		var index = $('#tabs ul').index($('#' + tabId));
+		tabs.tabs("option", "active", index);
+	}
+		
+	var select = document.getElementById('mapreduce_template');
+	
+	// Create Map Reduce executor and link it to a new tab
+	var createMapReduce = function(name) {
+		var executor = MapReduceExecutorManager.createExecutor(name);
+		if (select.selectedIndex > 0) {
+			var templateExecutor = MapReduceExecutorManager.executors[select.selectedIndex-1];
+			executor = MapReduceExecutorManager.createExecutor(name, templateExecutor.document, templateExecutor.mapFunc, templateExecutor.reduceFunc, templateExecutor.finalizeFunc);
+		}
+		else {
+			executor = MapReduceExecutorManager.createExecutor(name);
+		}		
+		openTab(executor);
+	};
+	
+	// Dialog New MapReduce
+	$( "#dialog_new_mapreduce" ).dialog({
+      autoOpen: false,
+      height: 300,
+      width: 350,
+      modal: true,
+      buttons: {
+        "OK": function() {
+          var bValid = true;		 
+          if ( bValid ) {
+        	  createMapReduce($( '#mapreduce_name' ).val());
+            $( this ).dialog( "close" );
+          }
+        },
+        Cancel: function() {
+          $( this ).dialog( "close" );
+        }
+      },
+      close: function() {
+        //allFields.val( "" ).removeClass( "ui-state-error" );
+      }
+    });
+	
+	// Populate combo template	
+	var executors = MapReduceExecutorManager.executors
+	for ( var i = 0; i < executors.length; i++) {
+		var name = executors[i].name;
+		var option = document.createElement('option');
+		option.value = name;
+		option.appendChild(document.createTextNode(name));
+		select.appendChild(option);
+	}	
+	
+});

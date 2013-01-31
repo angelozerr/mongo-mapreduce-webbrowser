@@ -1,0 +1,33 @@
+@import "jquery.ui.theme.min.css";
+@import "jquery-ui.min.css";
+
+body {
+	font-size: 62.5%;
+	font-family: "Trebuchet MS", "Arial", "Helvetica", "Verdana", "sans-serif";
+}
+
+#dialog_new_mapreduce label, #dialog_new_mapreduce input { display:block; }
+#dialog_new_mapreduce label { margin-top: 0.5em; }
+#dialog_new_mapreduce input, #dialog_new_mapreduce textarea { width: 95%; }
+#tabs { margin-top: 1em; }
+#tabs li .ui-icon-close { float: left; margin: 0.4em 0.2em 0 0; cursor: pointer; }
+	
+.right{
+	float:right;
+}
+
+#new_mapreduce{
+	margin:4px 5px 0 0;
+	cursor:pointer;
+	background-image: url(../images/new_mapreduce.png);
+	width:16px;
+	height:16px;	
+}
+
+#add_mapreduce{
+	margin: 4px 5px 0 0;
+	cursor:pointer;
+	background-image: url(../images/add_mapreduce.png);
+	width:16px;
+	height:16px;
+}
