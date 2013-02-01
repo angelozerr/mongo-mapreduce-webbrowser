@@ -1,53 +1,79 @@
 // https://github.com/mongodb/mongo/blob/master/src/mongo/shell/mr.js
 var MR = {};
 
+if (!Array.prototype.forEach)
+{
+  Array.prototype.forEach = function(fun /*, thisp*/)
+  {
+    var len = this.length;
+    if (typeof fun != "function")
+      throw new TypeError();
+
+    var thisp = arguments[1];
+    for (var i = 0; i < len; i++)
+    {
+      if (i in this)
+        fun.call(thisp, this[i], i, this);
+    }
+  };
+} 
 MR.doMapReduce = function(jsonArray, mapFunc, reduceFunc, finalizeFunc){
 	MR.cleanup();
 
-	// 1) Map step
-	var jsonObject = null;
-	for (var idx = 0; idx < jsonArray.length; idx++) {
-		jsonObject= jsonArray[idx];		 
-		mapFunc.call(jsonObject);
+	var oldPrint = window.print;
+	try {
+	
+		window.print = MR.print;
+		
+		// 1) Map step
+		var jsonObject = null;
+		for (var idx = 0; idx < jsonArray.length; idx++) {
+			jsonObject= jsonArray[idx];
+			mapFunc.call(jsonObject);
+		}
+		
+		// 2) Reduce step
+		var reduceResult = [];
+		var values = null;
+		
+		for ( var i=0; i<$arr.length; i++){
+	        var data = $arr[i];
+	        if ( ! data ) 
+	            continue;
+	        var r = reduceFunc( data.key , data.values.slice( 0 , data.count ) );
+	        if ( r && r.length && r[0] ){ 
+	            data.values = r; 
+	            data.count = r.length;
+	        }
+	        else{ 
+	            data.values[0] = r;
+	            data.count = 1;
+	        }
+	        if ( data.count == 1 ){
+	        	reduceResult.push( { _id : data.key , value : data.values[0] } );
+	        }
+	        else {
+	        	reduceResult.push( { _id : data.key , value : data.values.slice( 0 , data.count ) } );
+	        }
+		}
+		
+		// Finalize step
+		if (finalizeFunc) {
+			var finalizeResult = [];
+			reduceResult.forEach( 
+			  function(z){
+			   z.value = finalizeFunc( z._id , z.value );
+			   finalizeResult.push( z );
+			  }
+			);
+			reduceResult = finalizeResult;
+		}
+	} catch(e) {
+		throw e;
+	}	
+	finally {
+		window.print = oldPrint;
 	}
-	
-	// 2) Reduce step
-	var reduceResult = [];
-	var values = null;
-	
-	for ( var i=0; i<$arr.length; i++){
-        var data = $arr[i];
-        if ( ! data ) 
-            continue;
-        var r = reduceFunc( data.key , data.values.slice( 0 , data.count ) );
-        if ( r && r.length && r[0] ){ 
-            data.values = r; 
-            data.count = r.length;
-        }
-        else{ 
-            data.values[0] = r;
-            data.count = 1;
-        }
-        if ( data.count == 1 ){
-        	reduceResult.push( { _id : data.key , value : data.values[0] } );
-        }
-        else {
-        	reduceResult.push( { _id : data.key , value : data.values.slice( 0 , data.count ) } );
-        }
-	}
-	
-	// Finalize step
-	if (finalizeFunc) {
-		var finalizeResult = [];
-		reduceResult.forEach( 
-		  function(z){
-		   z.value = finalizeFunc( z._id , z.value );
-		   finalizeResult.push( z );
-		  }
-		);
-		reduceResult = finalizeResult;
-	}
-	
 	return reduceResult;
 };
 
@@ -57,7 +83,7 @@ MR.init = function(){
     $arrKey = [];
     $nbKeys = 0;
     emit = MR.emit;
-    print = MR.print;
+    //print = MR.print;
     tojson = MR.tojson;
     $numEmits = 0;
     $numReduces = 0;
@@ -277,5 +303,7 @@ tojsonObject = function( x, indent , nolint ){
 }
 
 MR.print = function(txt) {
-	console.log(txt);
+	if (console) {
+		console.log(txt);
+	}
 };

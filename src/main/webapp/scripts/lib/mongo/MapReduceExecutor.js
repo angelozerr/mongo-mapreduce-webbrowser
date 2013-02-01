@@ -79,12 +79,12 @@ SubMapReduceExecutor.prototype.execute = function(name, index) {
 };
 
 var MapReduceExecutor = (function () {
-	this.name = null;
+	/*this.name = null;
 	this.document = null;
 	this.mapFunc = null;
 	this.reduceFunc = null;
 	this.finalizeFunc = null;
-	this.script=null;
+	this.script=null;*/
 	return function() {		
 		for ( var i = 0; i < arguments.length; i++) {
 			switch (i) {

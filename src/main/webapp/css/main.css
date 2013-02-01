@@ -1,15 +1,73 @@
 @import "jquery.ui.theme.min.css";
 @import "jquery-ui.min.css";
 
-body {
+html, body{
+	height:100%;
+	overflow-y: hidden;
+}
+
+body{
+	background-color:#fff;
+	overflow:hidden;
 	font-size: 62.5%;
 	font-family: "Trebuchet MS", "Arial", "Helvetica", "Verdana", "sans-serif";
+}
+
+header{
+	height: 26px;
+	background: #f3f3f3; /* for non-css3 browsers */
+
+	border-top-width: 1px;
+	border-left-width:1px;
+	border-right-width:1px;
+	border-bottom-width: 1px;
+	border-style: solid;
+	
+	padding:2px;
+	//border-top-color: #969497;
+	//border-bottom-color: #000000;
+}
+
+#main{
+	height:100%;
+	padding:27px auto 18px;	
+}
+
+#editor{
+	width:auto;
+	height:100%;
+	//margin:0 0 0 200px;
+	position:relative;
+	box-shadow:10px 2px 10px -5px #444;
+	z-index:1;
+}
+
+#editor_wrapper{
+	//height:100%;
+	overflow: auto;
+}
+
+#navigator-container{ 
+	//height:100%;
+	//overflow:auto;
+}
+
+#navigator-wrapper{
+	height:100% !important;
+	width:200px;
+	float:left;
+	background-color: #323232;
+}
+
+#explorer-tree > *{
+	height:100%;
+	width:100%;
 }
 
 #dialog_new_mapreduce label, #dialog_new_mapreduce input { display:block; }
 #dialog_new_mapreduce label { margin-top: 0.5em; }
 #dialog_new_mapreduce input, #dialog_new_mapreduce textarea { width: 95%; }
-#tabs { margin-top: 1em; }
+#tabs { margin: 0 0 0 0; }
 #tabs li .ui-icon-close { float: left; margin: 0.4em 0.2em 0 0; cursor: pointer; }
 	
 .right{
@@ -20,8 +78,8 @@ body {
 	margin:4px 5px 0 0;
 	cursor:pointer;
 	background-image: url(../images/new_mapreduce.png);
-	width:16px;
-	height:16px;	
+	width:24px;
+	height:24px;	
 }
 
 #add_mapreduce{
@@ -30,4 +88,9 @@ body {
 	background-image: url(../images/add_mapreduce.png);
 	width:16px;
 	height:16px;
+}
+
+.main_gradient{
+	background: -webkit-gradient(linear, left top, left bottom, from(white), to(#f3f3f3)); /* webkit */
+	background: -moz-linear-gradient(top,  white,  #f3f3f3); /* firefox */
 }
