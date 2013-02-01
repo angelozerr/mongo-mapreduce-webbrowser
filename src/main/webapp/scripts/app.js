@@ -55,6 +55,8 @@ $(function() {
 
 		var index = $('#tabs ul').index($('#' + tabId));
 		tabs.tabs("option", "active", index);
+		
+		executor.execute();
 	}
 
 	var select = document.getElementById('mapreduce_template');
