@@ -48,13 +48,13 @@ header{
 }
 
 #navigator-container{ 
-	//height:100%;
+	height:100%;
 	//overflow:auto;
 }
 
 #navigator-wrapper{
 	height:100% !important;
-	width:200px;
+	width:250px;
 	float:left;
 	background-color: #323232;
 }

@@ -107,5 +107,26 @@ $(function() {
 		option.appendChild(document.createTextNode(name));
 		select.appendChild(option);
 	}
+	
+	$("#navigator-container").dynatree({
+		title: "Lazy loading sample",
+		fx: { height: "toggle", duration: 200 },
+		autoFocus: false, // Set focus to first child, when expanding or lazy-loading.
+		initAjax: {
+			url: "jaxrs/resources/mapreduces/"
+			},
+
+		onActivate: function(node) {
+			//$("#echoActive").text("" + node + " (" + node.getKeyPath()+ ")");
+		},
+
+		onLazyRead: function(node){
+			node.appendAjax({
+				url: "jaxrs/resources/mapreduces/",
+				// We don't want the next line in production code:
+				debugLazyDelay: 750
+			});
+		}
+	});
 
 });

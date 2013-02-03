@@ -57,4 +57,49 @@ public class ResourcesService {
 		}, new MediaType("application", "javascript")).build();
 	}
 
+	@GET
+	@Path("/mapreduces")
+	public Response getMapreduces(@Context ServletContext context)
+			throws IOException {
+		String filePath = context.getRealPath("mapreduces");
+		final File file = new File(filePath);
+		return Response.ok(new StreamingOutput() {
+
+			public void write(OutputStream out) throws IOException,
+					WebApplicationException {
+				IOUtils.write("[", out);
+				toJSON(file, out);
+				IOUtils.write("]", out);
+				IOUtils.closeQuietly(out);
+			}
+		}, MediaType.APPLICATION_JSON).build();
+	}
+
+	private void toJSON(File file, OutputStream out) throws IOException {
+		IOUtils.write("{", out);
+
+		IOUtils.write("\"title\":", out);
+		IOUtils.write("\"", out);
+		IOUtils.write(file.getName(), out);
+		IOUtils.write("\"", out);
+		
+		if (file.isDirectory()) {
+			IOUtils.write(", \"isFolder\":true", out);
+			IOUtils.write(", \"expand\":true", out);
+			IOUtils.write(", \"children\":[", out);
+			
+			File[] files = file.listFiles();
+			for (int i = 0; i < files.length; i++) {
+				if(i>0){
+					IOUtils.write(",", out);
+				}
+				toJSON(files[i], out);
+			}
+			
+			IOUtils.write("]", out);
+		}
+		
+		IOUtils.write("}", out);
+	}
+
 }
