@@ -17,48 +17,6 @@ $(function() {
 	// $( "#dialog_new_mapreduce" ).dialog( "open" );
 	// });
 
-	var createTabs = function() {
-		var tabs = $("#tabs").tabs();
-		// close icon: removing the tab on click
-		tabs.delegate("span.ui-icon-close", "click", function() {
-			var panelId = $(this).closest("li").remove().attr("aria-controls");
-			$("#" + panelId).remove();
-			tabs.tabs("refresh");
-		});
-		return tabs;
-	};
-
-	var tabCount = 0;
-	var tabs = null;
-	var openTab = function(executor) {
-		if (tabs == null) {
-			tabs = createTabs();
-		}
-
-		var label = executor.name;
-		var tabId = "tabs-" + (tabCount++);
-
-		var li = "<li><a href='#"
-				+ tabId
-				+ "'>"
-				+ label
-				+ "</a> <span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>"
-		tabs.find(".ui-tabs-nav").append(li);
-
-		var tabContent = document.createElement('div');
-		tabContent.id = tabId;
-
-		executor.loadUI(tabContent);
-
-		tabs.append(tabContent);
-		tabs.tabs("refresh");
-
-		var index = $('#tabs ul').index($('#' + tabId));
-		tabs.tabs("option", "active", index);
-		
-		executor.execute();
-	}
-
 	var select = document.getElementById('mapreduce_template');
 
 	// Create Map Reduce executor and link it to a new tab
@@ -72,7 +30,7 @@ $(function() {
 		} else {
 			executor = MapReduceExecutorManager.createExecutor(name);
 		}
-		openTab(executor);
+		MapReduceExecutorManager.openTab(executor);
 	};
 
 	// Dialog New MapReduce
@@ -126,6 +84,11 @@ $(function() {
 				// We don't want the next line in production code:
 				debugLazyDelay: 750
 			});
+		},
+		
+		onDblClick: function(node, event) {
+			var path = node.getKeyPath(false);			
+			MapReduceExecutorManager.openInTab(path);
 		}
 	});
 

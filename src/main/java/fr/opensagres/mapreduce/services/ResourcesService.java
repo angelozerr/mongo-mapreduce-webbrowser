@@ -12,6 +12,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -46,15 +47,21 @@ public class ResourcesService {
 	@Path("/load/{fileName}")
 	public Response load(@Context ServletContext context,
 			@PathParam("fileName") String fileName) throws IOException {
-		String filePath = context.getRealPath("mapreduces/custom/" + fileName);
-		final File file = new File(filePath);
-		return Response.ok(new StreamingOutput() {
 
-			public void write(OutputStream output) throws IOException,
-					WebApplicationException {
-				IOUtils.copy(new FileInputStream(file), output);
-			}
-		}, new MediaType("application", "javascript")).build();
+		CacheControl cacheControl = new CacheControl();
+		cacheControl.setNoCache(true);
+
+		String filePath = context.getRealPath(fileName);
+		final File file = new File(filePath);
+		return Response
+				.ok(new StreamingOutput() {
+
+					public void write(OutputStream output) throws IOException,
+							WebApplicationException {
+						IOUtils.copy(new FileInputStream(file), output);
+					}
+				}, new MediaType("application", "javascript"))
+				.cacheControl(cacheControl).build();
 	}
 
 	@GET
@@ -82,23 +89,28 @@ public class ResourcesService {
 		IOUtils.write("\"", out);
 		IOUtils.write(file.getName(), out);
 		IOUtils.write("\"", out);
-		
+
+		IOUtils.write(",\"key\":", out);
+		IOUtils.write("\"", out);
+		IOUtils.write(file.getName(), out);
+		IOUtils.write("\"", out);
+
 		if (file.isDirectory()) {
 			IOUtils.write(", \"isFolder\":true", out);
 			IOUtils.write(", \"expand\":true", out);
 			IOUtils.write(", \"children\":[", out);
-			
+
 			File[] files = file.listFiles();
 			for (int i = 0; i < files.length; i++) {
-				if(i>0){
+				if (i > 0) {
 					IOUtils.write(",", out);
 				}
 				toJSON(files[i], out);
 			}
-			
+
 			IOUtils.write("]", out);
 		}
-		
+
 		IOUtils.write("}", out);
 	}
 

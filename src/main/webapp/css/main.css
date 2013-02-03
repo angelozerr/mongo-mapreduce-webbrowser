@@ -1,5 +1,6 @@
 @import "jquery.ui.theme.min.css";
 @import "jquery-ui.min.css";
+@import "jquery.contextMenu.css";
 
 html, body{
 	height:100%;
