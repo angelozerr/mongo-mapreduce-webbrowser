@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<cloudbees-web-app xmlns="http://www.cloudbees.com/xml/webapp/1">
+  <!-- Application ID (formatted CB_ACCOUNT/APPNAME) -->
+  <appid>mongo-mapreduce-webbrowser</appid>
+
+<!--
+ configure tomcat to allow backslashes in URL...
+ see : http://mail-archives.apache.org/mod_mbox/cxf-issues/201203.mbox/%3C839744302.23575.1332860185120.JavaMail.tomcat@hel.zones.apache.org%3E
+ see : http://wiki.cloudbees.com/bin/view/RUN/CloudBeesWebXml -->
+
+  <sysprop name="org.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH" value="true" />
+  
+   <sysprop name="org.apache.catalina.connector.CoyoteAdapter.ALLOW_BACKSLASH" value="true" />
+</cloudbees-web-app>
