@@ -52,6 +52,7 @@ public class ResourcesService {
 	public Response load(@Context ServletContext context,
 			@PathParam("fileName") String fileName) throws IOException {
 
+		fileName = fileName.replaceAll("%2F", "/");
 		CacheControl cacheControl = new CacheControl();
 		cacheControl.setNoCache(true);
 
