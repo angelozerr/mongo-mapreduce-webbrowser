@@ -134,6 +134,9 @@ MapReduceExecutor.prototype.save = function() {
 		jsContent += '\n' + documentName + '=' + executor.bsonTextarea.value;
 	}
 
+	jsContent +='\n' + namespace + '.name="' + this.name + '";';
+	jsContent +='\nMapReduceExecutorManager.addExecutor(' + namespace + ');';
+	
 	var _this = this;
 	jQuery.ajax({
 		type : 'GET',

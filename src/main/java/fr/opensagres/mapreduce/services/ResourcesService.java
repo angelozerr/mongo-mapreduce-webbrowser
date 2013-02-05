@@ -2,12 +2,14 @@ package fr.opensagres.mapreduce.services;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
@@ -22,6 +24,8 @@ import org.apache.commons.io.IOUtils;
 
 @Path("/resources")
 public class ResourcesService {
+
+	private static final MediaType APPLICATION_JAVASCRIPT = new MediaType("application", "javascript");
 
 	@GET
 	@Path("/save/{fileName}")
@@ -53,6 +57,9 @@ public class ResourcesService {
 
 		String filePath = context.getRealPath(fileName);
 		final File file = new File(filePath);
+		if (!file.exists()) {
+			throw new NotFoundException(new FileNotFoundException(filePath));
+		}
 		return Response
 				.ok(new StreamingOutput() {
 
@@ -60,7 +67,7 @@ public class ResourcesService {
 							WebApplicationException {
 						IOUtils.copy(new FileInputStream(file), output);
 					}
-				}, new MediaType("application", "javascript"))
+				}, APPLICATION_JAVASCRIPT)
 				.cacheControl(cacheControl).build();
 	}
 

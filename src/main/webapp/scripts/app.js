@@ -21,15 +21,11 @@ $(function() {
 
 	// Create Map Reduce executor and link it to a new tab
 	var createMapReduce = function(name) {
-		var executor = MapReduceExecutorManager.createExecutor(name);
-		if (select.selectedIndex > 0) {
-			var templateExecutor = MapReduceExecutorManager.executors[select.selectedIndex - 1];
-			executor = MapReduceExecutorManager.createExecutor(name,
-					templateExecutor.document, templateExecutor.mapFunc,
-					templateExecutor.reduceFunc, templateExecutor.finalizeFunc);
-		} else {
-			executor = MapReduceExecutorManager.createExecutor(name);
-		}
+		var document = [];
+		var mapFunc = 'function () {\n}'
+		var reduceFunc = 'function (key, values) {\n}'
+		var executor = MapReduceExecutorManager.createExecutor(name, document,
+				mapFunc, reduceFunc);
 		MapReduceExecutorManager.openTab(executor);
 	};
 
@@ -56,39 +52,71 @@ $(function() {
 		}
 	});
 
-	// Populate combo template
-	var executors = MapReduceExecutorManager.executors
-	for ( var i = 0; i < executors.length; i++) {
-		var name = executors[i].name;
-		var option = document.createElement('option');
-		option.value = name;
-		option.appendChild(document.createTextNode(name));
-		select.appendChild(option);
-	}
-	
-	$("#navigator-container").dynatree({
-		title: "Lazy loading sample",
-		fx: { height: "toggle", duration: 200 },
-		autoFocus: false, // Set focus to first child, when expanding or lazy-loading.
-		initAjax: {
-			url: "jaxrs/resources/mapreduces/"
-			},
+	// --- Contextmenu helper --------------------------------------------------
+	var bindContextMenu = function(span) {
+		// Add context menu to this node:
+		$(span).contextMenu({
+			menu : "myMenu"
+		}, function(action, el, pos) {
+			// The event was bound to the <span> tag, but the node object
+			// is stored in the parent <li> tag
+			var node = $.ui.dynatree.getNode(el);
+			switch (action) {
+			case "new":
+				$("#dialog_new_mapreduce").dialog("open");
+				break;
+			case "open":
+				var path = node.getKeyPath(false);
+				MapReduceExecutorManager.openInTab(path);
+				break;
+			case "paste":
+				// copyPaste(action, node);
+				break;
+			default:
+				alert("Todo: appply action '" + action + "' to node " + node);
+			}
+		});
+	};
 
-		onActivate: function(node) {
-			//$("#echoActive").text("" + node + " (" + node.getKeyPath()+ ")");
+	$("#navigator-container").dynatree({
+		title : "Lazy loading sample",
+		fx : {
+			height : "toggle",
+			duration : 200
+		},
+		autoFocus : false, // Set focus to first child, when expanding or
+		// lazy-loading.
+		initAjax : {
+			url : "jaxrs/resources/mapreduces/"
 		},
 
-		onLazyRead: function(node){
+		onActivate : function(node) {
+			// $("#echoActive").text("" + node + " (" + node.getKeyPath()+ ")");
+		},
+
+		onClick : function(node, event) {
+			// Close menu on click
+			if ($(".contextMenu:visible").length > 0) {
+				$(".contextMenu").hide();
+				// return false;
+			}
+		},
+
+		onLazyRead : function(node) {
 			node.appendAjax({
-				url: "jaxrs/resources/mapreduces/",
+				url : "jaxrs/resources/mapreduces/",
 				// We don't want the next line in production code:
-				debugLazyDelay: 750
+				debugLazyDelay : 750
 			});
 		},
-		
-		onDblClick: function(node, event) {
-			var path = node.getKeyPath(false);			
+
+		onDblClick : function(node, event) {
+			var path = node.getKeyPath(false);
 			MapReduceExecutorManager.openInTab(path);
+		},
+
+		onCreate : function(node, span) {
+			bindContextMenu(span);
 		}
 	});
 
