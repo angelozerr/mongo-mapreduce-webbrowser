@@ -5,30 +5,36 @@ $(function() {
 	nav.resizable({
 		handles : "e"
 	});
-
-	// Button click on New MapReduce open the dialog
-	document.getElementById("new_mapreduce").onclick = function() {
+	
+	var openNewMapreduceDialog = function(path) {
+		if (!path) {
+			path = '/mapreduces';
+		}
+		$('#mapreduce_path').val(path);
+		$('#mapreduce_name').val('MyMapReduce.js');
 		$("#dialog_new_mapreduce").dialog("open");
 	};
 
-	// $( "#new_mapreduce" )
-	// .button()
-	// .click(function() {
-	// $( "#dialog_new_mapreduce" ).dialog( "open" );
-	// });
+	// Button click on New MapReduce open the dialog
+	document.getElementById("new_mapreduce").onclick = function() {
+		openNewMapreduceDialog();
+	};
 
 	var select = document.getElementById('mapreduce_template');
 
 	// Create Map Reduce executor and link it to a new tab
-	var createMapReduce = function(name) {
+	var createMapReduce = function(file, namespaceName, name) {
 		var document = [];
 		var mapFunc = 'function () {\n}'
 		var reduceFunc = 'function (key, values) {\n}'
-		var executor = MapReduceExecutorManager.createExecutor(name, document,
+		var executor = MapReduceExecutorManager.createExecutor(file, namespaceName, name, document,
 				mapFunc, reduceFunc);
+		executor.dirty = true;
+		MapReduceExecutorManager.loadedExecutors[file] = executor;
 		MapReduceExecutorManager.openTab(executor);
 	};
 
+	var selectedPath
 	// Dialog New MapReduce
 	$("#dialog_new_mapreduce").dialog({
 		autoOpen : false,
@@ -39,7 +45,10 @@ $(function() {
 			"OK" : function() {
 				var bValid = true;
 				if (bValid) {
-					createMapReduce($('#mapreduce_name').val());
+					var name = $('#mapreduce_name').val();
+					var file = $('#mapreduce_path').val() + '/' + name;
+					var namespaceName = file.replace(/\//g ,'_').replace(/./g ,'_');
+					createMapReduce(file, namespaceName, name);
 					$(this).dialog("close");
 				}
 			},
@@ -63,7 +72,8 @@ $(function() {
 			var node = $.ui.dynatree.getNode(el);
 			switch (action) {
 			case "new":
-				$("#dialog_new_mapreduce").dialog("open");
+				var path = node.getKeyPath(node.data.isFolder);
+				openNewMapreduceDialog(path);
 				break;
 			case "open":
 				var path = node.getKeyPath(false);

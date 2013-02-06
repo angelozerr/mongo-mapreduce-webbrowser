@@ -1,4 +1,3 @@
-var index = 0;
 var SubMapReduceExecutor = (function() {
 
 	this.bsonTextarea = null;
@@ -7,14 +6,14 @@ var SubMapReduceExecutor = (function() {
 	this.finalizeTextarea = null;
 	this.resultTextarea = null;
 	return function() {
-
+		this.ownerExecutor = arguments[0];
 	};
 
 })();
 
-SubMapReduceExecutor.prototype.execute = function(name, index) {
+SubMapReduceExecutor.prototype.execute = function(index) {
 
-	var namespace = name + index;
+	var namespace = this.ownerExecutor.namespaceName;
 	var mapFuncName = namespace + '.mapFunc';
 	var reduceFuncName = namespace + '.reduceFunc';
 
@@ -33,30 +32,35 @@ SubMapReduceExecutor.prototype.execute = function(name, index) {
 		return;
 	}
 
-	try {
-		eval('if(!' + namespace + '){var ' + namespace + '={};}' + mapFuncName
-				+ '=' + this.mapTextarea.value);
-	} catch (e) {
-		errorCallback('Error Map: ' + e);
-		return;
-	}
+	var dirty = this.ownerExecutor.dirty;
+	if (dirty) {
+		try {
+			eval('if(!' + namespace + '){var ' + namespace + '={};}'
+					+ mapFuncName + '=' + this.mapTextarea.value);
+		} catch (e) {
+			errorCallback('Error Map: ' + e);
+			return;
+		}
 
-	try {
-		eval(reduceFuncName + '=' + this.reduceTextarea.value);
-	} catch (e) {
-		errorCallback('Error Reduce: ' + e);
-		return;
+		try {
+			eval(reduceFuncName + '=' + this.reduceTextarea.value);
+		} catch (e) {
+			errorCallback('Error Reduce: ' + e);
+			return;
+		}
 	}
 
 	// Finalize
 	var finalizeFuncName = null;
 	if (this.finalizeTextarea.value != '') {
 		finalizeFuncName = namespace + '.finalizeFunc';
-		try {
-			eval(finalizeFuncName + '=' + this.finalizeTextarea.value);
-		} catch (e) {
-			errorCallback('Error Finalize: ' + e);
-			return;
+		if (dirty) {
+			try {
+				eval(finalizeFuncName + '=' + this.finalizeTextarea.value);
+			} catch (e) {
+				errorCallback('Error Finalize: ' + e);
+				return;
+			}
 		}
 	}
 
@@ -81,21 +85,28 @@ var MapReduceExecutor = (function() {
 	 * this.reduceFunc = null; this.finalizeFunc = null; this.script=null;
 	 */
 	return function() {
+		this.dirty = false;
 		for ( var i = 0; i < arguments.length; i++) {
 			switch (i) {
 			case 0:
-				this.name = arguments[i];
+				this.file = arguments[i];
 				break;
 			case 1:
-				this.document = arguments[i];
+				this.namespaceName = arguments[i];
 				break;
 			case 2:
-				this.mapFunc = arguments[i];
+				this.name = arguments[i];
 				break;
 			case 3:
-				this.reduceFunc = arguments[i];
+				this.document = arguments[i];
 				break;
 			case 4:
+				this.mapFunc = arguments[i];
+				break;
+			case 5:
+				this.reduceFunc = arguments[i];
+				break;
+			case 6:
 				this.finalizeFunc = arguments[i];
 				break;
 			default:
@@ -103,28 +114,28 @@ var MapReduceExecutor = (function() {
 			}
 		}
 		this.executors = [];
-		this.executors.push(new SubMapReduceExecutor());
+		this.executors.push(new SubMapReduceExecutor(this));
 	};
 })();
 
 MapReduceExecutor.prototype.execute = function() {
 	for ( var i = 0; i < this.executors.length; i++) {
 		executor = this.executors[i];
-		executor.execute(this.name, i);
+		executor.execute(i);
 	}
 };
 
 MapReduceExecutor.prototype.save = function() {
 
-	var fileName = this.name + '.js';
+	var fileName = this.file;
 
-	var namespace = this.name + '0';
+	var namespace = '${namespace}';
 	var mapFuncName = namespace + '.mapFunc';
 	var reduceFuncName = namespace + '.reduceFunc';
 	var finalizeFuncName = namespace + '.finalizeFunc';
 	var documentName = namespace + '.document';
 
-	var jsContent = 'var ' + namespace + '={};';
+	var jsContent = '';
 
 	for ( var i = 0; i < this.executors.length; i++) {
 		executor = this.executors[i];
@@ -134,14 +145,12 @@ MapReduceExecutor.prototype.save = function() {
 		jsContent += '\n' + documentName + '=' + executor.bsonTextarea.value;
 	}
 
-	jsContent +='\n' + namespace + '.name="' + this.name + '";';
-	jsContent +='\nMapReduceExecutorManager.addExecutor(' + namespace + ');';
-	
 	var _this = this;
 	jQuery.ajax({
 		type : 'GET',
-		url : 'jaxrs/resources/save/' + fileName,
+		url : 'jaxrs/resources/save',
 		data : {
+			fileName : fileName,
 			content : jsContent
 		},
 		success : function(data, textStatus, jqXHR) {
@@ -167,14 +176,7 @@ if (!String.prototype.endsWith) {
 };
 
 MapReduceExecutor.prototype.loadScript = function() {
-	var fileName = this.name;
-	if (fileName.startsWith('/')) {
-		fileName = fileName.substring(1, fileName.length);
-	}
-	if (!fileName.endsWith('.js')) {
-		fileName += '.js';
-	}
-	fileName = fileName.replace(/\//g, '%2F');
+	var fileName = this.file;
 	var headID = document.getElementsByTagName("head")[0];
 
 	var oldScript = this.script;
@@ -183,8 +185,7 @@ MapReduceExecutor.prototype.loadScript = function() {
 	}
 	var script = document.createElement('script');
 	// script.type = 'text/javascript';
-	index++;
-	script.src = 'jaxrs/resources/load/' + fileName;
+	script.src = 'jaxrs/resources/load?fileName=' + fileName;
 	// + '?i=' + index;
 
 	headID.appendChild(script);
@@ -200,9 +201,11 @@ MapReduceExecutor.prototype.loadUI = function(parent) {
 
 	var _this = this;
 	var mapReduceChanged = function() {
+		_this.dirty = true;
 		_this.execute();
 	}
 
+	// Save
 	var saveButton = document.createElement('input');
 	saveButton.type = 'button';
 	saveButton.value = 'Save';
@@ -210,6 +213,15 @@ MapReduceExecutor.prototype.loadUI = function(parent) {
 		_this.save();
 	};
 	parent.appendChild(saveButton);
+
+	// Execute
+	var executeButton = document.createElement('input');
+	executeButton.type = 'button';
+	executeButton.value = 'Execute';
+	executeButton.onclick = function() {
+		_this.execute();
+	};
+	parent.appendChild(executeButton);
 
 	var executor = null;
 	for ( var i = 0; i < this.executors.length; i++) {

@@ -4609,7 +4609,6 @@ $.widget( "ui.tabs", {
 						return false;
 					}
 				});
-			}
 
 			// check for a tab marked active via a class
 			if ( active === null ) {

@@ -1,8 +1,6 @@
 //examples used are adapted from http://github.com/mongodb/mongo/blob/master/jstests/mr2.js
 
-var mapreduce_mr2 = {};
-
-mapreduce_mr2.mapFunc = function() {
+${namespace}.mapFunc = function() {
     print('map emitting on ' + tojson(this));
 	for ( var i = 0; i < this.comments.length; i++ ) {
         var c = this.comments[i];
@@ -10,7 +8,7 @@ mapreduce_mr2.mapFunc = function() {
     }
 };
 
-mapreduce_mr2.reduceFunc = function(who, values) {
+${namespace}.reduceFunc = function(who, values) {
 	print('reduce called on key ' + tojson(who) + ' with values ' + tojson(values));
 	if (!(values instanceof Array))
 		return values;
@@ -22,13 +20,13 @@ mapreduce_mr2.reduceFunc = function(who, values) {
     return n;
 };
 
-mapreduce_mr2.finalizeFunc = function( who, res ) {
+${namespace}.finalizeFunc = function( who, res ) {
 	print('finalize called on key ' + tojson(who) + ' with value ' + tojson(res));
     res.avg = res.totalSize / res.num;
     return res;
 };
 
-mapreduce_mr2.document = [ {
+${namespace}.document = [ {
 	comments : [ {
 		who : "a",
 		txt : "asdasdasd"
@@ -45,6 +43,3 @@ mapreduce_mr2.document = [ {
 		txt : "asdasdasdaasdasdas"
 	} ]
 } ];
-
-mapreduce_mr2.name = 'mapreduce_mr2';
-MapReduceExecutorManager.addExecutor(mapreduce_mr2);
