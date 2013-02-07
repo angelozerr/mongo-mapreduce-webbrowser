@@ -93,10 +93,11 @@ MapReduceExecutorManager.openTab = function(executor) {
 
 	var label = executor.name;
 	var tabId = "tabs-" + (MapReduceExecutorManager.tabCount++);
-
+	var tabIdLink = "a-" + tabId; 
+	
 	var li = "<li><a href='#"
 			+ tabId
-			+ "'>"
+			+ "' class='status-ok' >&nbsp;"
 			+ label
 			+ "</a> <span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>"
 	var ulTabs = tabs.find(".ui-tabs-nav");
@@ -105,7 +106,7 @@ MapReduceExecutorManager.openTab = function(executor) {
 	var tabContent = document.createElement('div');
 	tabContent.id = tabId;
 
-	executor.loadUI(tabContent);
+	executor.loadUI(tabContent, tabIdLink);
 
 	tabs.append(tabContent);
 	tabs.tabs("refresh");
@@ -113,7 +114,11 @@ MapReduceExecutorManager.openTab = function(executor) {
 	var index = MapReduceExecutorManager.getTabIndex(tabId);
 	tabs.tabs("option", "active", index);
 	
-	executor.tabId = tabId;	
+	executor.tabId = tabId;
+	
+	var tabIdLink = $("#" + tabId ).attr("aria-labelledby");
+	executor.tabLink = document.getElementById(tabIdLink);
+	
 	executor.execute();
 	
 };

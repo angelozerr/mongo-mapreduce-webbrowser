@@ -29,6 +29,11 @@ header{
 	//border-bottom-color: #000000;
 }
 
+h1 {
+  margin-top : 5px;
+  margin-bottom : 5px;
+}
+
 #main{
 	height:100%;
 	padding:27px auto 18px;	
@@ -94,4 +99,25 @@ header{
 .main_gradient{
 	background: -webkit-gradient(linear, left top, left bottom, from(white), to(#f3f3f3)); /* webkit */
 	background: -moz-linear-gradient(top,  white,  #f3f3f3); /* firefox */
+}
+
+.toolbar {
+    padding: 4px;
+    display: inline-block;
+  }
+/* support: IE7 */
+*+html .toolbar {
+  display: inline;
+}
+
+.status-ok {
+	background-image: url(../images//status-ok.png);
+	background-repeat: no-repeat;
+	background-position-x: 1px;
+}
+
+.status-nok {
+	background-image: url(../images/status-nok.png);
+	background-repeat: no-repeat;
+	background-position-x: 1px;
 }

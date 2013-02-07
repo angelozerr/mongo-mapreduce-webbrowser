@@ -12,13 +12,14 @@ var SubMapReduceExecutor = (function() {
 })();
 
 SubMapReduceExecutor.prototype.execute = function(index) {
-
+	
 	var namespace = this.ownerExecutor.namespaceName;
 	var mapFuncName = namespace + '.mapFunc';
 	var reduceFuncName = namespace + '.reduceFunc';
 
 	var _this = this;
 	var errorCallback = function(message) {
+		_this.ownerExecutor.setError(message);
 		_this.resultTextarea.value = message;
 	};
 
@@ -80,10 +81,6 @@ SubMapReduceExecutor.prototype.execute = function(index) {
 };
 
 var MapReduceExecutor = (function() {
-	/*
-	 * this.name = null; this.document = null; this.mapFunc = null;
-	 * this.reduceFunc = null; this.finalizeFunc = null; this.script=null;
-	 */
 	return function() {
 		this.dirty = false;
 		for ( var i = 0; i < arguments.length; i++) {
@@ -118,10 +115,38 @@ var MapReduceExecutor = (function() {
 	};
 })();
 
+MapReduceExecutor.prototype.isValid = function() {
+	return this.error == null;
+};
+
+MapReduceExecutor.prototype.isDirty = function() {
+	return this.dirty == true;
+};
+
+MapReduceExecutor.prototype.setError = function(error) {
+	this.error = error;
+	this.tabLink.className = this.tabLink.className.replace('status-ok', '');
+	this.tabLink.className = this.tabLink.className.replace('status-nok', '');
+	if (error == null) {
+		this.tabLink.className = 'status-ok' + this.tabLink.className;
+	}
+	else {
+		this.tabLink.className = 'status-nok' + this.tabLink.className;
+	}
+};
+
 MapReduceExecutor.prototype.execute = function() {
+	this.setError(null);
+	if (this.isDirty()) {
+		this.saveButton.button( "enable" );
+	}
 	for ( var i = 0; i < this.executors.length; i++) {
 		executor = this.executors[i];
 		executor.execute(i);
+	}	
+	
+	if (!this.isValid()) {
+		this.saveButton.button( "disable" );
 	}
 };
 
@@ -200,29 +225,49 @@ MapReduceExecutor.prototype.loadUI = function(parent) {
 	var defaultFinalizeFunc = this.finalizeFunc;
 
 	var _this = this;
-	var mapReduceChanged = function() {
+	
+	// Toolbar 
+	var toolbarDiv = document.createElement('div');
+	toolbarDiv.className="toolbar ui-corner-all";
+	
+	// Save button
+	var saveButton = document.createElement('button');
+	saveButton.appendChild(document.createTextNode('Save MapReduce'));
+	$(saveButton).button({
+	      text: false,
+	      disabled: true,
+	      icons:{
+	    	  primary: "ui-icon-disk"
+	      }
+	    })
+	    .click(function() {
+	    	_this.save();
+	    });	    
+	this.saveButton = $(saveButton);
+	toolbarDiv.appendChild(saveButton);
+	
+	// Execute button
+	var executeButton = document.createElement('button');
+	executeButton.appendChild(document.createTextNode('Execute MapReduce'));
+	toolbarDiv.appendChild(executeButton);
+	$(executeButton).button({
+	      text: false,
+	      icons: {
+	          primary: "ui-icon-play"
+	      }
+	    })
+	    .click(function() {
+	    	_this.execute();
+	});		
+	
+	parent.appendChild(toolbarDiv);
+	
+	// Create textareas
+	var mapReduceChanged = function() {	
 		_this.dirty = true;
 		_this.execute();
 	}
-
-	// Save
-	var saveButton = document.createElement('input');
-	saveButton.type = 'button';
-	saveButton.value = 'Save';
-	saveButton.onclick = function() {
-		_this.save();
-	};
-	parent.appendChild(saveButton);
-
-	// Execute
-	var executeButton = document.createElement('input');
-	executeButton.type = 'button';
-	executeButton.value = 'Execute';
-	executeButton.onclick = function() {
-		_this.execute();
-	};
-	parent.appendChild(executeButton);
-
+	
 	var executor = null;
 	for ( var i = 0; i < this.executors.length; i++) {
 		executor = this.executors[i];
