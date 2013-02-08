@@ -27,11 +27,10 @@ $(function() {
 		var document = [];
 		var mapFunc = 'function () {\n}'
 		var reduceFunc = 'function (key, values) {\n}'
-		var executor = MapReduceExecutorManager.createExecutor(file, namespaceName, name, document,
+		var executor = MultiPageEditor.createExecutor(file, namespaceName, name, document,
 				mapFunc, reduceFunc);
-		executor.dirty = true;
-		MapReduceExecutorManager.loadedExecutors[file] = executor;
-		MapReduceExecutorManager.openTab(executor);
+		MultiPageEditor.openTab(executor);
+		executor.setDirty(true);
 	};
 
 	var selectedPath
@@ -77,7 +76,7 @@ $(function() {
 				break;
 			case "open":
 				var path = node.getKeyPath(false);
-				MapReduceExecutorManager.openInTab(path);
+				MultiPageEditor.openInTab(path);
 				break;
 			case "paste":
 				// copyPaste(action, node);
@@ -97,7 +96,7 @@ $(function() {
 		autoFocus : false, // Set focus to first child, when expanding or
 		// lazy-loading.
 		initAjax : {
-			url : "jaxrs/resources/mapreduces/"
+			url : "jaxrs/resources/list/"
 		},
 
 		onActivate : function(node) {
@@ -122,7 +121,7 @@ $(function() {
 
 		onDblClick : function(node, event) {
 			var path = node.getKeyPath(false);
-			MapReduceExecutorManager.openInTab(path);
+			MultiPageEditor.openInTab(path);
 		},
 
 		onCreate : function(node, span) {

@@ -57,6 +57,10 @@ public class ResourcesService {
 		CacheControl cacheControl = new CacheControl();
 		cacheControl.setNoCache(true);
 
+		final boolean jsFile = fileName.endsWith(".js");
+		MediaType mediaType = jsFile ? APPLICATION_JAVASCRIPT
+				: MediaType.TEXT_PLAIN_TYPE;
+
 		String filePath = context.getRealPath(fileName);
 		final File file = new File(filePath);
 		if (!file.exists()) {
@@ -66,88 +70,92 @@ public class ResourcesService {
 
 			public void write(OutputStream output) throws IOException,
 					WebApplicationException {
+				if (!jsFile) {
+					IOUtils.copy(new FileInputStream(file), output);
+				} else {
+					String namespace = fileName;
+					namespace = namespace.replaceAll("/", "_")
+							.replaceAll("\\\\", "_").replaceAll("[.]", "_");
 
-				String namespace = fileName;
-				namespace = namespace.replaceAll("/", "_")
-						.replaceAll("\\\\", "_").replaceAll("[.]", "_");
+					// Variable : var
+					// mapreduces_default_mapreduce_mr_merge_js={};
+					IOUtils.write("var ", output);
+					IOUtils.write(namespace, output);
+					IOUtils.write("={};", output);
 
-				// Variable : var mapreduces_default_mapreduce_mr_merge_js={};
-				IOUtils.write("var ", output);
-				IOUtils.write(namespace, output);
-				IOUtils.write("={};", output);
+					IOUtils.write("\n", output);
 
-				IOUtils.write("\n", output);
+					// Get the object of DataInputStream
+					DataInputStream in = null;
+					try {
+						in = new DataInputStream(new FileInputStream(file));
 
-				// Get the object of DataInputStream
-				DataInputStream in = null;
-				try {
-					in = new DataInputStream(new FileInputStream(file));
-
-					BufferedReader br = new BufferedReader(
-							new InputStreamReader(in));
-					String strLine;
-					// Read File Line By Line
-					while ((strLine = br.readLine()) != null) {
-						if (strLine.startsWith("${namespace}")) {
-							IOUtils.write(namespace, output);
-							IOUtils.write(strLine.substring(
-									"${namespace}".length(), strLine.length()),
-									output);
-						} else {
-							IOUtils.write(strLine, output);
+						BufferedReader br = new BufferedReader(
+								new InputStreamReader(in));
+						String strLine;
+						// Read File Line By Line
+						while ((strLine = br.readLine()) != null) {
+							if (strLine.startsWith("${namespace}")) {
+								IOUtils.write(namespace, output);
+								IOUtils.write(strLine.substring(
+										"${namespace}".length(),
+										strLine.length()), output);
+							} else {
+								IOUtils.write(strLine, output);
+							}
+							IOUtils.write("\n", output);
 						}
-						IOUtils.write("\n", output);
+					} finally {
+						if (in != null) {
+							IOUtils.closeQuietly(in);
+						}
 					}
-				} finally {
-					if (in != null) {
-						IOUtils.closeQuietly(in);
-					}
+
+					IOUtils.write("\n", output);
+
+					// namespaceName:
+					// mapreduces_default_mapreduce_mr_merge_js.namespaceName =
+					// 'mapreduces_default_mapreduce_mr_merge_js';
+					IOUtils.write("\n", output);
+					IOUtils.write(namespace, output);
+					IOUtils.write(".namespaceName='", output);
+					IOUtils.write(namespace, output);
+					IOUtils.write("';", output);
+
+					// Name: mapreduces_default_mapreduce_mr_merge_js.name =
+					// 'mapreduce_mr_merge.js';
+					IOUtils.write("\n", output);
+					IOUtils.write(namespace, output);
+					IOUtils.write(".name='", output);
+					IOUtils.write(file.getName(), output);
+					IOUtils.write("';", output);
+
+					// File: mapreduces_default_mapreduce_mr_merge_js.file =
+					// 'mapreduces/default/mapreduce_mr_merge.js';
+					IOUtils.write("\n", output);
+					IOUtils.write(namespace, output);
+					IOUtils.write(".file='", output);
+					IOUtils.write(fileName, output);
+					IOUtils.write("';", output);
+
+					// addExector:
+					// MultiPageEditor.addExecutor(mapreduces_default_mapreduce_mr_merge_js);
+					IOUtils.write("\n", output);
+					IOUtils.write("MultiPageEditor.addExecutor(", output);
+					IOUtils.write(namespace, output);
+					IOUtils.write(");", output);
+
+					IOUtils.closeQuietly(output);
 				}
-
-				IOUtils.write("\n", output);
-
-				// namespaceName: mapreduces_default_mapreduce_mr_merge_js.namespaceName =
-				// 'mapreduces_default_mapreduce_mr_merge_js';
-				IOUtils.write("\n", output);
-				IOUtils.write(namespace, output);
-				IOUtils.write(".namespaceName='", output);
-				IOUtils.write(namespace, output);
-				IOUtils.write("';", output);
-				
-				// Name: mapreduces_default_mapreduce_mr_merge_js.name =
-				// 'mapreduce_mr_merge.js';
-				IOUtils.write("\n", output);
-				IOUtils.write(namespace, output);
-				IOUtils.write(".name='", output);
-				IOUtils.write(file.getName(), output);
-				IOUtils.write("';", output);
-
-				// File: mapreduces_default_mapreduce_mr_merge_js.file =
-				// 'mapreduces/default/mapreduce_mr_merge.js';
-				IOUtils.write("\n", output);
-				IOUtils.write(namespace, output);
-				IOUtils.write(".file='", output);
-				IOUtils.write(fileName, output);
-				IOUtils.write("';", output);
-
-				// addExector:
-				// MapReduceExecutorManager.addExecutor(mapreduces_default_mapreduce_mr_merge_js);
-				IOUtils.write("\n", output);
-				IOUtils.write("MapReduceExecutorManager.addExecutor(", output);
-				IOUtils.write(namespace, output);
-				IOUtils.write(");", output);
-
-				IOUtils.closeQuietly(output);
-				// IOUtils.copy(new FileInputStream(file), output);
 			}
-		}, APPLICATION_JAVASCRIPT).cacheControl(cacheControl).build();
+		}, mediaType).cacheControl(cacheControl).build();
 	}
 
 	@GET
-	@Path("/mapreduces")
-	public Response getMapreduces(@Context ServletContext context)
+	@Path("/list")
+	public Response getResources(@Context ServletContext context)
 			throws IOException {
-		String filePath = context.getRealPath("mapreduces");
+		String filePath = context.getRealPath("resources");
 		final File file = new File(filePath);
 		return Response.ok(new StreamingOutput() {
 

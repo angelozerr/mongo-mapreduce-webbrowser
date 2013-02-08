@@ -1,6 +1,6 @@
 var SubMapReduceExecutor = (function() {
 
-	this.bsonTextarea = null;
+	this.bsonEditor = null;
 	this.mapTextarea = null;
 	this.reduceTextarea = null;
 	this.finalizeTextarea = null;
@@ -12,7 +12,7 @@ var SubMapReduceExecutor = (function() {
 })();
 
 SubMapReduceExecutor.prototype.execute = function(index) {
-	
+
 	var namespace = this.ownerExecutor.namespaceName;
 	var mapFuncName = namespace + '.mapFunc';
 	var reduceFuncName = namespace + '.reduceFunc';
@@ -23,7 +23,7 @@ SubMapReduceExecutor.prototype.execute = function(index) {
 		_this.resultTextarea.value = message;
 	};
 
-	var jsonData = this.bsonTextarea.value;
+	var jsonData = this.bsonEditor.getValue();
 
 	var jsonArray = null;
 	try {
@@ -115,6 +115,11 @@ var MapReduceExecutor = (function() {
 	};
 })();
 
+/**
+ * Returns true if the editor page is valid and false otherwise.
+ * 
+ * @returns Boolean
+ */
 MapReduceExecutor.prototype.isValid = function() {
 	return this.error == null;
 };
@@ -123,30 +128,31 @@ MapReduceExecutor.prototype.isDirty = function() {
 	return this.dirty == true;
 };
 
+MapReduceExecutor.prototype.setDirty = function(dirty) {
+	var oldDirty = this.dirty;
+	this.dirty = dirty;
+	if (dirty != oldDirty) {
+		this.onDirtyChanged(this);
+	}
+};
+
 MapReduceExecutor.prototype.setError = function(error) {
 	this.error = error;
-	this.tabLink.className = this.tabLink.className.replace('status-ok', '');
-	this.tabLink.className = this.tabLink.className.replace('status-nok', '');
-	if (error == null) {
-		this.tabLink.className = 'status-ok' + this.tabLink.className;
-	}
-	else {
-		this.tabLink.className = 'status-nok' + this.tabLink.className;
-	}
+	this.onErrorChanged(this);
 };
 
 MapReduceExecutor.prototype.execute = function() {
 	this.setError(null);
 	if (this.isDirty()) {
-		this.saveButton.button( "enable" );
+		this.saveButton.button("enable");
 	}
 	for ( var i = 0; i < this.executors.length; i++) {
 		executor = this.executors[i];
 		executor.execute(i);
-	}	
-	
+	}
+
 	if (!this.isValid()) {
-		this.saveButton.button( "disable" );
+		this.saveButton.button("disable");
 	}
 };
 
@@ -167,7 +173,7 @@ MapReduceExecutor.prototype.save = function() {
 		jsContent += '\n' + mapFuncName + '=' + executor.mapTextarea.value;
 		jsContent += '\n' + reduceFuncName + '='
 				+ executor.reduceTextarea.value;
-		jsContent += '\n' + documentName + '=' + executor.bsonTextarea.value;
+		jsContent += '\n' + documentName + '=' + executor.bsonEditor.getValue();
 	}
 
 	var _this = this;
@@ -217,7 +223,7 @@ MapReduceExecutor.prototype.loadScript = function() {
 	this.script = script;
 };
 
-MapReduceExecutor.prototype.loadUI = function(parent) {
+MapReduceExecutor.prototype.createUI = function(parent) {
 
 	var defaultDocument = this.document;
 	var defaultMapFunc = this.mapFunc;
@@ -225,49 +231,47 @@ MapReduceExecutor.prototype.loadUI = function(parent) {
 	var defaultFinalizeFunc = this.finalizeFunc;
 
 	var _this = this;
-	
-	// Toolbar 
+
+	// Toolbar
 	var toolbarDiv = document.createElement('div');
-	toolbarDiv.className="toolbar ui-corner-all";
-	
+	toolbarDiv.className = "toolbar ui-corner-all";
+
 	// Save button
 	var saveButton = document.createElement('button');
 	saveButton.appendChild(document.createTextNode('Save MapReduce'));
 	$(saveButton).button({
-	      text: false,
-	      disabled: true,
-	      icons:{
-	    	  primary: "ui-icon-disk"
-	      }
-	    })
-	    .click(function() {
-	    	_this.save();
-	    });	    
+		text : false,
+		disabled : true,
+		icons : {
+			primary : "ui-icon-disk"
+		}
+	}).click(function() {
+		_this.save();
+	});
 	this.saveButton = $(saveButton);
 	toolbarDiv.appendChild(saveButton);
-	
+
 	// Execute button
 	var executeButton = document.createElement('button');
 	executeButton.appendChild(document.createTextNode('Execute MapReduce'));
 	toolbarDiv.appendChild(executeButton);
 	$(executeButton).button({
-	      text: false,
-	      icons: {
-	          primary: "ui-icon-play"
-	      }
-	    })
-	    .click(function() {
-	    	_this.execute();
-	});		
-	
+		text : false,
+		icons : {
+			primary : "ui-icon-play"
+		}
+	}).click(function() {
+		_this.execute();
+	});
+
 	parent.appendChild(toolbarDiv);
-	
+
 	// Create textareas
-	var mapReduceChanged = function() {	
-		_this.dirty = true;
+	var mapReduceChanged = function() {
+		_this.setDirty(true);
 		_this.execute();
 	}
-	
+
 	var executor = null;
 	for ( var i = 0; i < this.executors.length; i++) {
 		executor = this.executors[i];
@@ -276,19 +280,13 @@ MapReduceExecutor.prototype.loadUI = function(parent) {
 
 		// BSON textarea
 		var textareaParent = document.createElement('div');
-		var bsonTextarea = document.createElement('textarea');
-		bsonTextarea.setAttribute("rows", "10");
-		bsonTextarea.setAttribute("cols", "150");
-
-		executor.bsonTextarea = bsonTextarea;
-		textareaParent.appendChild(bsonTextarea);
-		parent.appendChild(textareaParent);
-
-		bsonTextarea.onkeyup = mapReduceChanged;
-		bsonTextarea.onchange = mapReduceChanged;
+		var bsonEditor = new BSONEditor(textareaParent);
 		if (defaultDocument != null) {
-			bsonTextarea.value = JSON.stringify(defaultDocument, null, '');
+			bsonEditor.setValue(JSON.stringify(defaultDocument, null, ''));
 		}
+		bsonEditor.addChangeListener(mapReduceChanged);
+		executor.bsonEditor = bsonEditor;
+		parent.appendChild(textareaParent);
 
 		$(parent).append($('<h1>MapReduce</h1>'));
 		var table = document.createElement('table');
