@@ -61,14 +61,12 @@ BSONEditorPage.prototype.createUI = function(parent) {
 
 	var editor = new BSONEditor(parent);
 
-	// load JSON.
+	// load JSON.	
 	var fileName = this.file;
+	fileName= fileName.replace(/\//g, '%2F');
 	jQuery.ajax({
 		type : 'GET', 
-		url : 'jaxrs/resources/load', 
-		data : {
-			fileName : fileName
-		},
+		url : 'jaxrs/resources/load/' + fileName, 
 		success : function(data, textStatus, jqXHR) {
 			editor.setValue(data);
 		},

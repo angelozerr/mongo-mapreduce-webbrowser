@@ -234,7 +234,10 @@ MapReduceEditorPage.prototype.loadScript = function() {
 	}
 	var script = document.createElement('script');
 	// script.type = 'text/javascript';
-	script.src = 'jaxrs/resources/load?fileName=' + fileName;
+	
+	fileName= fileName.replace(/\//g, '%2F');
+	
+	script.src = 'jaxrs/resources/load/' + fileName;
 	// + '?i=' + index;
 
 	headID.appendChild(script);
