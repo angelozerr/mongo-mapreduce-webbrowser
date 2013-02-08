@@ -33,7 +33,7 @@ SubMapReduceExecutor.prototype.execute = function(index) {
 		return;
 	}
 
-	var dirty = this.ownerExecutor.dirty;
+	var dirty = this.ownerExecutor.isDirty();
 	if (dirty) {
 		try {
 			eval('if(!' + namespace + '){var ' + namespace + '={};}'
@@ -80,7 +80,7 @@ SubMapReduceExecutor.prototype.execute = function(index) {
 	}
 };
 
-var MapReduceExecutor = (function() {
+var MapReduceEditorPage = (function() {
 	return function() {
 		this.dirty = false;
 		for ( var i = 0; i < arguments.length; i++) {
@@ -115,33 +115,51 @@ var MapReduceExecutor = (function() {
 	};
 })();
 
+MapReduceEditorPage.prototype.getName = function() {
+	return this.name;
+};
+
 /**
  * Returns true if the editor page is valid and false otherwise.
  * 
  * @returns Boolean
  */
-MapReduceExecutor.prototype.isValid = function() {
+MapReduceEditorPage.prototype.isValid = function() {
 	return this.error == null;
 };
 
-MapReduceExecutor.prototype.isDirty = function() {
+/**
+ * Returns true if the editor page is dirty and false otherwise.
+ * 
+ * @returns Boolean
+ */
+MapReduceEditorPage.prototype.isDirty = function() {
 	return this.dirty == true;
 };
 
-MapReduceExecutor.prototype.setDirty = function(dirty) {
+/**
+ * Set the dirty flag.
+ */
+MapReduceEditorPage.prototype.setDirty = function(dirty) {
 	var oldDirty = this.dirty;
 	this.dirty = dirty;
-	if (dirty != oldDirty) {
+	if (dirty != oldDirty && this.onDirtyChanged) {
 		this.onDirtyChanged(this);
 	}
 };
 
-MapReduceExecutor.prototype.setError = function(error) {
+/**
+ * Set the error.
+ * 
+ */
+MapReduceEditorPage.prototype.setError = function(error) {
 	this.error = error;
-	this.onErrorChanged(this);
+	if (this.onErrorChanged) {
+		this.onErrorChanged(this);
+	}
 };
 
-MapReduceExecutor.prototype.execute = function() {
+MapReduceEditorPage.prototype.execute = function() {
 	this.setError(null);
 	if (this.isDirty()) {
 		this.saveButton.button("enable");
@@ -156,7 +174,7 @@ MapReduceExecutor.prototype.execute = function() {
 	}
 };
 
-MapReduceExecutor.prototype.save = function() {
+MapReduceEditorPage.prototype.save = function() {
 
 	var fileName = this.file;
 
@@ -206,7 +224,7 @@ if (!String.prototype.endsWith) {
 	};
 };
 
-MapReduceExecutor.prototype.loadScript = function() {
+MapReduceEditorPage.prototype.loadScript = function() {
 	var fileName = this.file;
 	var headID = document.getElementsByTagName("head")[0];
 
@@ -223,7 +241,7 @@ MapReduceExecutor.prototype.loadScript = function() {
 	this.script = script;
 };
 
-MapReduceExecutor.prototype.createUI = function(parent) {
+MapReduceEditorPage.prototype.createUI = function(parent) {
 
 	var defaultDocument = this.document;
 	var defaultMapFunc = this.mapFunc;

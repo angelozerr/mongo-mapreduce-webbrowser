@@ -7,8 +7,34 @@ MultiPageEditor.pages = [];
 MultiPageEditor.tabCount = 0;
 MultiPageEditor.tabs = null;
 
-MultiPageEditor.createExecutor = function(file, namespaceName, name, document, mapFunc, reduceFunc, finalizeFunc) {
-	return new MapReduceExecutor(file, namespaceName, name, document, mapFunc, reduceFunc, finalizeFunc);
+// ------------- BSON Editor Page
+
+/**
+ * Create BSON Editor Page.
+ */
+MultiPageEditor.createBSONEditorPage = function(path) {
+	var page = page = new BSONEditorPage(path);
+	MultiPageEditor.pagesCachedByPath[path] = page;
+	MultiPageEditor.pages.push(page);
+	return page;
+};
+
+
+MultiPageEditor.createMapReduceEditorPage = function(file, namespaceName, name, document, mapFunc, reduceFunc, finalizeFunc) {
+	var page = new MapReduceEditorPage(file, namespaceName, name, document, mapFunc, reduceFunc, finalizeFunc);
+	MultiPageEditor.pagesCachedByPath[file] = page;
+	MultiPageEditor.pages.push(page);
+	return page;
+};
+
+MultiPageEditor.createMapReduce = function(file, namespaceName, name) {
+	var document = [];
+	var mapFunc = 'function () {\n}'
+	var reduceFunc = 'function (key, values) {\n}'
+	var executor = MultiPageEditor.createMapReduceEditorPage(file, namespaceName, name, document,
+			mapFunc, reduceFunc);
+	executor.setDirty(true);
+	MultiPageEditor.openTab(executor);
 };
 
 MultiPageEditor.addExecutor = function(namespace) {
@@ -16,9 +42,7 @@ MultiPageEditor.addExecutor = function(namespace) {
 	if (file) {		
 		var executor = MultiPageEditor.pagesCachedByPath[file];
 		if (!executor) {
-			executor = MultiPageEditor.createExecutor(file);	
-			MultiPageEditor.pagesCachedByPath[file] = executor;
-			MultiPageEditor.pages.push(executor);
+			executor = MultiPageEditor.createMapReduceEditorPage(file);				
 		}
 		executor.namespaceName = namespace.namespaceName;
 		executor.name = namespace.name;
@@ -28,7 +52,27 @@ MultiPageEditor.addExecutor = function(namespace) {
 		executor.finalizeFunc = namespace.finalizeFunc;
 		executor.setDirty(false);
 		
+		// Open the page in a tab
 		MultiPageEditor.openOrSelectTab(executor);
+		
+		// Check if the page is in a tree, otherwise reload the tree
+		var dynatree = MultiPageEditor.tree.dynatree("getTree");
+		var treePath = executor.file;
+		dynatree.loadKeyPath(treePath, function(node, status){
+		    if(status == "loaded") {
+		        // 'node' is a parent that was just traversed.
+		        // If we call expand() here, then all nodes will be expanded
+		        // as we go
+		        node.expand();
+		    }else if(status == "ok") {
+		        // 'node' is the end node of our path.
+		        // If we call activate() or makeVisible() here, then the
+		        // whole branch will be exoanded now
+		        node.activate();
+		    }else if(status == "notfound") {
+		    	dynatree.reload();		    	
+		    }
+		});		
 	}
 };
 
@@ -37,17 +81,13 @@ MultiPageEditor.openInTab = function(path) {
 	if (!page) {
 		// open the well editor swith the extension file.
 		if (path.endsWith('.json')) {
-			// BSON Editor
-			page = new BSONEditorPage(path);
-			MultiPageEditor.pagesCachedByPath[path] = page;
-			MultiPageEditor.pages.push(page);
+			// BSON Editor page
+			page = new MultiPageEditor.createBSONEditorPage(path);
 			MultiPageEditor.openOrSelectTab(page);
 		}
 		else {
-			// MapReduce editor
-			page = MultiPageEditor.createExecutor(path);
-			MultiPageEditor.pagesCachedByPath[path] = page;
-			MultiPageEditor.pages.push(page);
+			// MapReduce editor page
+			page = MultiPageEditor.createMapReduceEditorPage(path);
 			page.loadScript();	
 		}
 	}
@@ -114,15 +154,7 @@ MultiPageEditor.openTab = function(page) {
 	
 	// Add dirty listener
 	page.onDirtyChanged = function(page) {
-		var label = page.tabLink.innerHTML;
-		if (label.endsWith(' *')) {
-			label = label.substring(0, label.length - 2);
-		}
-		if (page.isDirty()) {
-			page.tabLink.innerHTML = label + ' *'
-		} else {
-			page.tabLink.innerHTML = label;
-		}		
+		page.tabLink.innerHTML = MultiPageEditor.getTabHeaderLabel(page);				
 	};
 	
 	// Add error listener
@@ -138,13 +170,15 @@ MultiPageEditor.openTab = function(page) {
 		}
 	};
 	
+	// Create tabs if needed.
 	var tabs = MultiPageEditor.tabs;
 	if (tabs == null) {
 		tabs = MultiPageEditor.createTabs();
 		MultiPageEditor.tabs = tabs;
 	}
 
-	var label = page.name;
+	// Create tab header
+	var label = MultiPageEditor.getTabHeaderLabel(page);
 	var tabId = "tabs-" + (MultiPageEditor.tabCount++);
 	var tabIdLink = "a-" + tabId; 
 	
@@ -174,4 +208,11 @@ MultiPageEditor.openTab = function(page) {
 	
 	page.execute();
 	
+};
+
+MultiPageEditor.getTabHeaderLabel = function(page) {
+	if (page.isDirty()) {
+		return page.getName() + ' *';
+	} 
+	return page.getName();
 };

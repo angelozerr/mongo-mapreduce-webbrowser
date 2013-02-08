@@ -10,9 +10,53 @@ var BSONEditorPage = (function() {
 				break;
 			}
 		}
+		this.name = this.file.substring(this.file.lastIndexOf('/') + 1, this.file.length);
 	};
 })();
 
+BSONEditorPage.prototype.getName = function() {
+	return this.name;
+};
+
+/**
+ * Returns true if the editor page is valid and false otherwise.
+ * 
+ * @returns Boolean
+ */
+BSONEditorPage.prototype.isValid = function() {
+	return this.error == null;
+};
+
+/**
+ * Returns true if the editor page is dirty and false otherwise.
+ * 
+ * @returns Boolean
+ */
+BSONEditorPage.prototype.isDirty = function() {
+	return this.dirty == true;
+};
+
+/**
+ * Set the dirty flag.
+ */
+BSONEditorPage.prototype.setDirty = function(dirty) {
+	var oldDirty = this.dirty;
+	this.dirty = dirty;
+	if (dirty != oldDirty && this.onDirtyChanged) {
+		this.onDirtyChanged(this);
+	}
+};
+
+/**
+ * Set the error.
+ * 
+ */
+BSONEditorPage.prototype.setError = function(error) {
+	this.error = error;
+	if (this.onErrorChanged) {
+		this.onErrorChanged(this);
+	}
+};
 BSONEditorPage.prototype.createUI = function(parent) {
 
 	var editor = new BSONEditor(parent);

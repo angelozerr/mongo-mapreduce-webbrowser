@@ -27,10 +27,10 @@ $(function() {
 		var document = [];
 		var mapFunc = 'function () {\n}'
 		var reduceFunc = 'function (key, values) {\n}'
-		var executor = MultiPageEditor.createExecutor(file, namespaceName, name, document,
+		var executor = MultiPageEditor.createMapReduceEditorPage(file, namespaceName, name, document,
 				mapFunc, reduceFunc);
-		MultiPageEditor.openTab(executor);
 		executor.setDirty(true);
+		MultiPageEditor.openTab(executor);
 	};
 
 	var selectedPath
@@ -46,7 +46,7 @@ $(function() {
 				if (bValid) {
 					var name = $('#mapreduce_name').val();
 					var file = $('#mapreduce_path').val() + '/' + name;
-					var namespaceName = file.replace(/\//g ,'_').replace(/./g ,'_');
+					var namespaceName = file.replace(/\//g ,'_').replace("." ,'_');
 					createMapReduce(file, namespaceName, name);
 					$(this).dialog("close");
 				}
@@ -87,7 +87,7 @@ $(function() {
 		});
 	};
 
-	$("#navigator-container").dynatree({
+	var tree = $("#navigator-container").dynatree({
 		title : "Lazy loading sample",
 		fx : {
 			height : "toggle",
@@ -128,5 +128,5 @@ $(function() {
 			bindContextMenu(span);
 		}
 	});
-
+	MultiPageEditor.tree = tree;
 });
