@@ -127,6 +127,10 @@ h1 {
   font-size: 15px;
 }
 
+.mapreduce-editor-container {
+  width:100%;
+}
+
 .CodeMirror {
   /* Set height, width, borders, and global font properties here */
   font-family: monospace;

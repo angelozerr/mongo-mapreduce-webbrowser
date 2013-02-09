@@ -1,9 +1,9 @@
 var SubMapReduceExecutor = (function() {
 
 	this.bsonEditor = null;
-	this.mapTextarea = null;
-	this.reduceTextarea = null;
-	this.finalizeTextarea = null;
+	this.mapEditor = null;
+	this.reduceEditor = null;
+	this.finalizeEditor = null;
 	this.resultEditor = null;
 	return function() {
 		this.ownerExecutor = arguments[0];
@@ -37,14 +37,14 @@ SubMapReduceExecutor.prototype.execute = function(index) {
 	if (dirty) {
 		try {
 			eval('if(!' + namespace + '){var ' + namespace + '={};}'
-					+ mapFuncName + '=' + this.mapTextarea.value);
+					+ mapFuncName + '=' + this.mapEditor.getValue());
 		} catch (e) {
 			errorCallback('Error Map: ' + e);
 			return;
 		}
 
 		try {
-			eval(reduceFuncName + '=' + this.reduceTextarea.value);
+			eval(reduceFuncName + '=' + this.reduceEditor.getValue());
 		} catch (e) {
 			errorCallback('Error Reduce: ' + e);
 			return;
@@ -53,11 +53,12 @@ SubMapReduceExecutor.prototype.execute = function(index) {
 
 	// Finalize
 	var finalizeFuncName = null;
-	if (this.finalizeTextarea.value != '') {
+	var finalizeContent = this.finalizeEditor.getValue();
+	if (finalizeContent != '') {
 		finalizeFuncName = namespace + '.finalizeFunc';
 		if (dirty) {
 			try {
-				eval(finalizeFuncName + '=' + this.finalizeTextarea.value);
+				eval(finalizeFuncName + '=' + finalizeContent);
 			} catch (e) {
 				errorCallback('Error Finalize: ' + e);
 				return;
@@ -168,6 +169,18 @@ MapReduceEditorPage.prototype.onAfterUI = function() {
 	this.execute();
 };
 
+MapReduceEditorPage.prototype.onAfterUI = function() {
+	for ( var i = 0; i < this.executors.length; i++) {
+		executor = this.executors[i];
+		executor.bsonEditor.onAfterUI();
+		executor.mapEditor.onAfterUI();
+		executor.reduceEditor.onAfterUI();
+		executor.finalizeEditor.onAfterUI();
+		executor.resultEditor.onAfterUI();
+	}
+	this.execute();
+};
+
 MapReduceEditorPage.prototype.execute = function() {
 	this.setError(null);
 	if (this.isDirty()) {
@@ -197,9 +210,9 @@ MapReduceEditorPage.prototype.save = function() {
 
 	for ( var i = 0; i < this.executors.length; i++) {
 		executor = this.executors[i];
-		jsContent += '\n' + mapFuncName + '=' + executor.mapTextarea.value;
+		jsContent += '\n' + mapFuncName + '=' + executor.mapEditor.value;
 		jsContent += '\n' + reduceFuncName + '='
-				+ executor.reduceTextarea.value;
+				+ executor.reduceEditor.value;
 		jsContent += '\n' + documentName + '=' + executor.bsonEditor.getValue();
 	}
 
@@ -320,6 +333,7 @@ MapReduceEditorPage.prototype.createUI = function(parent) {
 
 		$(parent).append($('<h1>MapReduce</h1>'));
 		var table = document.createElement('table');
+		table.className = 'mapreduce-editor-container';
 		var tr = document.createElement('tr');
 
 		// Map textarea
@@ -329,17 +343,13 @@ MapReduceEditorPage.prototype.createUI = function(parent) {
 		legend.appendChild(document.createTextNode('Map Function'));
 		fieldset.appendChild(legend);
 
-		var mapTextarea = document.createElement('textarea');
-		mapTextarea.setAttribute("rows", "10");
-		mapTextarea.setAttribute("cols", "75");
-		mapTextarea.onkeyup = mapReduceChanged;
-		mapTextarea.onchange = mapReduceChanged;
+		var mapEditor = new ScriptEditor(fieldset);
 		if (defaultMapFunc != null) {
-			mapTextarea.value = defaultMapFunc;
+			mapEditor.setValue(defaultMapFunc);
 		}
-
-		executor.mapTextarea = mapTextarea;
-		fieldset.appendChild(mapTextarea);
+		mapEditor.addChangeListener(mapReduceChanged);
+		executor.mapEditor = mapEditor;
+		
 		td.appendChild(fieldset);
 		tr.appendChild(td);
 
@@ -350,17 +360,13 @@ MapReduceEditorPage.prototype.createUI = function(parent) {
 		legend.appendChild(document.createTextNode('Reduce Function'));
 		fieldset.appendChild(legend);
 
-		var reduceTextarea = document.createElement('textarea');
-		reduceTextarea.setAttribute("rows", "10");
-		reduceTextarea.setAttribute("cols", "75");
-		reduceTextarea.onkeyup = mapReduceChanged;
-		reduceTextarea.onchange = mapReduceChanged;
+		var reduceEditor = new ScriptEditor(fieldset);
 		if (defaultReduceFunc != null) {
-			reduceTextarea.value = defaultReduceFunc;
+			reduceEditor.setValue(defaultReduceFunc);
 		}
-		executor.reduceTextarea = reduceTextarea;
+		reduceEditor.addChangeListener(mapReduceChanged);
+		executor.reduceEditor = reduceEditor;
 
-		fieldset.appendChild(reduceTextarea);
 		td.appendChild(fieldset);
 		tr.appendChild(td);
 
@@ -371,17 +377,13 @@ MapReduceEditorPage.prototype.createUI = function(parent) {
 		legend.appendChild(document.createTextNode('Finalize Function'));
 		fieldset.appendChild(legend);
 
-		var finalizeTextarea = document.createElement('textarea');
-		finalizeTextarea.setAttribute("rows", "10");
-		finalizeTextarea.setAttribute("cols", "75");
-		finalizeTextarea.onkeyup = mapReduceChanged;
-		finalizeTextarea.onchange = mapReduceChanged;
+		var finalizeEditor = new ScriptEditor(fieldset);
 		if (defaultFinalizeFunc != null) {
-			finalizeTextarea.value = defaultFinalizeFunc;
+			finalizeEditor.setValue(defaultFinalizeFunc);
 		}
-		executor.finalizeTextarea = finalizeTextarea;
+		finalizeEditor.addChangeListener(mapReduceChanged);
+		executor.finalizeEditor = finalizeEditor;
 
-		fieldset.appendChild(finalizeTextarea);
 		td.appendChild(fieldset);
 		tr.appendChild(td);
 
@@ -390,12 +392,10 @@ MapReduceEditorPage.prototype.createUI = function(parent) {
 
 		$(parent).append($('<h1>Result</h1>'));
 
-		// Result
-		var resultTextarea = document.createElement('textarea');
-		
 		var resultEditor = new BSONEditor(parent);
 		executor.resultEditor = resultEditor;
 
 	}
 
 };
+s
