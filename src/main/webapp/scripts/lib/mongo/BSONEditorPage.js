@@ -59,20 +59,25 @@ BSONEditorPage.prototype.setError = function(error) {
 };
 BSONEditorPage.prototype.createUI = function(parent) {
 
-	var editor = new BSONEditor(parent);
+	this.editor = new BSONEditor(parent);
 
 	// load JSON.	
+	var _this = this;
 	var fileName = this.file;
 	fileName= fileName.replace(/\//g, '%2F');
 	jQuery.ajax({
 		type : 'GET', 
 		url : 'jaxrs/resources/load/' + fileName, 
 		success : function(data, textStatus, jqXHR) {
-			editor.setValue(data);
+			_this.editor.setValue(data);
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
 			alert(errorThrown);
 		}
 	});
 	
+};
+
+BSONEditorPage.prototype.onAfterUI = function() {
+	this.editor.onAfterUI();
 };

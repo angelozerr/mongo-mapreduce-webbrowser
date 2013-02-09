@@ -206,7 +206,7 @@ MultiPageEditor.openTab = function(page) {
 	var tabIdLink = $("#" + tabId ).attr("aria-labelledby");
 	page.tabLink = document.getElementById(tabIdLink);
 	
-	page.execute();
+	page.onAfterUI();
 	
 };
 

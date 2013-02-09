@@ -122,3 +122,14 @@ h1 {
 	background-repeat: no-repeat;
 	background-position-x: 1px;
 }
+
+.bson-editor-container {
+  font-size: 15px;
+}
+
+.CodeMirror {
+  /* Set height, width, borders, and global font properties here */
+  font-family: monospace;
+  height: 200px;
+  border: 1px solid black;
+}

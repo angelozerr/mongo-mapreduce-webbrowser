@@ -17,4 +17,5 @@ ${namespace}.reduceFunc=function (who, values) {
     }
     return n;
 }
-${namespace}.document=[{"comments":[{"who":"a","txt":"asdasdasd"},{"who":"b","txt":"asdasdasdasdasdasdas"}]},{"comments":[{"who":"b","txt":"asdasdasdaaa"},{"who":"c","txt":"asdasdasdaasdasdas"}]}]
+${namespace}.document=[{"comments":[{"who":"a","txt":"asdasdasd"},{"who":"b","txt":"asdasdasdasdasdasdas"}]},
+ {"comments":[{"who":"b","txt":"asdasdasdaaa"},{"who":"c","txt":"asdasdasdaasdasdas"}]}]

@@ -14,10 +14,15 @@ function BSONEditor(parent) {
  */
 BSONEditor.prototype._createUI = function(parent) {
 
+	var containerDiv = document.createElement('div');
+	containerDiv.className = "bson-editor-container";
+
 	var bsonTextarea = document.createElement('textarea');
 	bsonTextarea.setAttribute("rows", "10");
 	bsonTextarea.setAttribute("cols", "150");
-	parent.appendChild(bsonTextarea);
+	containerDiv.appendChild(bsonTextarea);
+	parent.appendChild(containerDiv);
+	
 	return bsonTextarea;
 };
 
@@ -27,8 +32,12 @@ BSONEditor.prototype._createUI = function(parent) {
  * @param value
  *            the value to set.
  */
-BSONEditor.prototype.setValue = function(bsonData) {
-	this.bsonTextarea.value = bsonData;
+BSONEditor.prototype.setValue = function(value) {
+	if (this.codeMirror) {
+		this.codeMirror.setValue(value)
+	} else {
+		this.bsonTextarea.value = value;
+	}
 };
 
 /**
@@ -37,13 +46,23 @@ BSONEditor.prototype.setValue = function(bsonData) {
  * @returns the value of the editor.
  */
 BSONEditor.prototype.getValue = function() {
-	return this.bsonTextarea.value;
+	return this.codeMirror.getValue();
 };
 
 /**
  * Add the given changed listener.
  */
 BSONEditor.prototype.addChangeListener = function(changeListener) {
-	this.bsonTextarea.onkeyup = changeListener;
-	this.bsonTextarea.onchange = changeListener;
+	this.changeListener = changeListener;
+};
+
+BSONEditor.prototype.onAfterUI = function() {
+	this.codeMirror = CodeMirror.fromTextArea(this.bsonTextarea, {
+		mode : 'application/json',
+		lineNumbers : true,
+		lineWrapping : true
+	});
+	if (this.changeListener) {
+		CodeMirror.on(this.codeMirror, "change", this.changeListener);
+	}
 };

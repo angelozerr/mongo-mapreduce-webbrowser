@@ -4,7 +4,7 @@ var SubMapReduceExecutor = (function() {
 	this.mapTextarea = null;
 	this.reduceTextarea = null;
 	this.finalizeTextarea = null;
-	this.resultTextarea = null;
+	this.resultEditor = null;
 	return function() {
 		this.ownerExecutor = arguments[0];
 	};
@@ -20,7 +20,7 @@ SubMapReduceExecutor.prototype.execute = function(index) {
 	var _this = this;
 	var errorCallback = function(message) {
 		_this.ownerExecutor.setError(message);
-		_this.resultTextarea.value = message;
+		_this.resultEditor.setValue(message);
 	};
 
 	var jsonData = this.bsonEditor.getValue();
@@ -73,7 +73,7 @@ SubMapReduceExecutor.prototype.execute = function(index) {
 		var reduceResult = MR.doMapReduce(jsonArray, eval(mapFuncName),
 				eval(reduceFuncName), finalizeFunc);
 		var json = BSON.toString(reduceResult, null, '  ');
-		this.resultTextarea.value = json;
+		this.resultEditor.setValue(json);
 	} catch (e) {
 		errorCallback('Error while executing MapReduce: ' + e);
 		return;
@@ -157,6 +157,15 @@ MapReduceEditorPage.prototype.setError = function(error) {
 	if (this.onErrorChanged) {
 		this.onErrorChanged(this);
 	}
+};
+
+MapReduceEditorPage.prototype.onAfterUI = function() {
+	for ( var i = 0; i < this.executors.length; i++) {
+		executor = this.executors[i];
+		executor.bsonEditor.onAfterUI();
+		executor.resultEditor.onAfterUI();
+	}
+	this.execute();
 };
 
 MapReduceEditorPage.prototype.execute = function() {
@@ -383,10 +392,9 @@ MapReduceEditorPage.prototype.createUI = function(parent) {
 
 		// Result
 		var resultTextarea = document.createElement('textarea');
-		resultTextarea.setAttribute("rows", "10");
-		resultTextarea.setAttribute("cols", "150");
-		executor.resultTextarea = resultTextarea;
-		parent.appendChild(resultTextarea);
+		
+		var resultEditor = new BSONEditor(parent);
+		executor.resultEditor = resultEditor;
 
 	}
 
