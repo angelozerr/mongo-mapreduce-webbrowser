@@ -4,7 +4,7 @@ $(function() {
 	var nav = $('#navigator-wrapper');
 	nav.resizable({
 		handles : "e"
-	});
+	}); 
 	
 	var openNewMapreduceDialog = function(path) {
 		if (!path) {
