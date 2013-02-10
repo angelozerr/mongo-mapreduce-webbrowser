@@ -17,5 +17,9 @@ ${namespace}.reduceFunc=function (who, values) {
     }
     return n;
 }
-${namespace}.document=[{"comments":[{"who":"a","txt":"asdasdasd"},{"who":"b","txt":"asdasdasdasdasdasdas"}]},
- {"comments":[{"who":"b","txt":"asdasdasdaaa"},{"who":"c","txt":"asdasdasdaasdasdas"}]}]
+${namespace}.finalizeFunc=function ( who, res ) {
+	print('finalize called on key ' + tojson(who) + ' with value ' + tojson(res));
+    res.avg = res.totalSize / res.num;
+    return res;
+} 
+${namespace}.document=[{"comments":[{"who":"a","txt":"asdasdasd"},{"who":"b","txt":"asdasdasdasdasdasdas"}]},{"comments":[{"who":"b","txt":"asdasdasdaaa"},{"who":"c","txt":"asdasdasdaasdasdas"}]}]
