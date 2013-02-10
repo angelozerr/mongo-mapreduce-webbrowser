@@ -62,6 +62,15 @@ ScriptEditor.prototype.onAfterUI = function() {
 		lineNumbers : true,
 		lineWrapping : true
 	});
+	var editor = this.codeMirror;
+	var hlLine = editor.addLineClass(0, "background", "activeline");
+	editor.on("cursorActivity", function() {
+	  var cur = editor.getLineHandle(editor.getCursor().line);
+	  if (cur != hlLine) {
+	    editor.removeLineClass(hlLine, "background", "activeline");
+	    hlLine = editor.addLineClass(cur, "background", "activeline");
+	  }
+	});
 	if (this.changeListener) {
 		CodeMirror.on(this.codeMirror, "change", this.changeListener);
 	}

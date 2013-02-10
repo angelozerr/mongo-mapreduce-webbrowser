@@ -210,9 +210,16 @@ MapReduceEditorPage.prototype.save = function() {
 
 	for ( var i = 0; i < this.executors.length; i++) {
 		executor = this.executors[i];
-		jsContent += '\n' + mapFuncName + '=' + executor.mapEditor.value;
+		jsContent += '\n' + mapFuncName + '=' + executor.mapEditor.getValue();
 		jsContent += '\n' + reduceFuncName + '='
-				+ executor.reduceEditor.value;
+				+ executor.reduceEditor.getValue();
+		
+		var finalizeContent = executor.finalizeEditor.getValue();
+		if (finalizeContent != '') {
+			jsContent += '\n' + finalizeFuncName + '='
+			+ finalizeContent;
+		};
+		
 		jsContent += '\n' + documentName + '=' + executor.bsonEditor.getValue();
 	}
 
@@ -398,4 +405,3 @@ MapReduceEditorPage.prototype.createUI = function(parent) {
 	}
 
 };
-s
