@@ -18,8 +18,8 @@ BSONEditor.prototype._createUI = function(parent) {
 	containerDiv.className = "bson-editor-container";
 
 	var bsonTextarea = document.createElement('textarea');
-	bsonTextarea.setAttribute("rows", "10");
-	bsonTextarea.setAttribute("cols", "150");
+	//bsonTextarea.setAttribute("rows", "10");
+	//bsonTextarea.setAttribute("cols", "150");
 	containerDiv.appendChild(bsonTextarea);
 	parent.appendChild(containerDiv);
 	

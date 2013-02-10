@@ -18,8 +18,8 @@ ScriptEditor.prototype._createUI = function(parent) {
 	containerDiv.className = "bson-editor-container";
 
 	var scriptTextarea = document.createElement('textarea');
-	scriptTextarea.setAttribute("rows", "10");
-	scriptTextarea.setAttribute("cols", "150");
+	//scriptTextarea.setAttribute("rows", "10");
+	//scriptTextarea.setAttribute("cols", "150");
 	containerDiv.appendChild(scriptTextarea);
 	parent.appendChild(containerDiv);
 	
