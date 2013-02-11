@@ -87,8 +87,9 @@ $(function() {
 		});
 	};
 
+	var baseURL = window.location.origin + window.location.pathname;
 	var tree = $("#navigator-container").dynatree({
-		title : "Lazy loading sample",
+		title : "Mongo tree",
 		fx : {
 			height : "toggle",
 			duration : 200
@@ -100,7 +101,12 @@ $(function() {
 		},
 
 		onActivate : function(node) {
-			// $("#echoActive").text("" + node + " (" + node.getKeyPath()+ ")");
+			document.getElementById('resource_link').innerHTML = '';
+			if (!node.data.isFolder) {
+				var url = baseURL + '?p=' + node.getKeyPath();
+				var htmlLink = '<a href=\"' + url + '">' + url  + '</a>';
+				document.getElementById('resource_link').innerHTML = htmlLink;	
+			}
 		},
 
 		onClick : function(node, event) {
@@ -134,11 +140,16 @@ $(function() {
 	var queryString = window.location.search;
 	if (queryString.startsWith('?')) {
 		queryString = '&' + queryString.substring(1, queryString.length);
-		var params = queryString.split('&resource=');
+		var params = queryString.split('&p=');
 		for ( var i = 0; i < params.length; i++) {
 			var path = params[i];
 			if (path != '') {
-				MultiPageEditor.openInTab(path);
+				try {
+					MultiPageEditor.openInTab(path);
+				}
+				catch(e) {
+					// Ignore error.
+				}
 			}
 		}
 	}		
