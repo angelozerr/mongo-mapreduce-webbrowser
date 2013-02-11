@@ -129,4 +129,17 @@ $(function() {
 		}
 	});
 	MultiPageEditor.tree = tree;
+	
+	// Check if there are resource parameter in the URL to open for each resource the tab.
+	var queryString = window.location.search;
+	if (queryString.startsWith('?')) {
+		queryString = '&' + queryString.substring(1, queryString.length);
+		var params = queryString.split('&resource=');
+		for ( var i = 0; i < params.length; i++) {
+			var path = params[i];
+			if (path != '') {
+				MultiPageEditor.openInTab(path);
+			}
+		}
+	}		
 });

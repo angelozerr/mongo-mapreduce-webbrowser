@@ -105,7 +105,7 @@ MR.emit = function(k, v) {
 MR.getNum = function(k) {
 	k = BSON.toString(k);
 	var num = $arrKey[k];
-	if (!num) {
+	if (typeof num === "undefined") {
 		num = $nbKeys++;
 		$arrKey[k] = num;
 	}
@@ -321,31 +321,6 @@ MR.print = function(txt) {
 		console.log(txt);
 	}
 };
-
-// Addition Array methods
-
-if (!Array.prototype.forEach) {
-	Array.prototype.forEach = function(fun /* , thisp */) {
-		var len = this.length;
-		if (typeof fun != "function")
-			throw new TypeError();
-
-		var thisp = arguments[1];
-		for ( var i = 0; i < len; i++) {
-			if (i in this)
-				fun.call(thisp, this[i], i, this);
-		}
-	};
-}
-
-if (!Array.sum) {
-
-	Array.sum = function(array) {
-		for ( var i = 0, sum = 0; i < array.length; sum += array[i++])
-			;
-		return sum;
-	};
-}
 
 //Array.prototype.max = function() {
 //	return Math.max.apply({}, this)

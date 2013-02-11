@@ -240,19 +240,6 @@ MapReduceEditorPage.prototype.save = function() {
 	});
 };
 
-if (typeof String.prototype.startsWith != 'function') {
-	String.prototype.startsWith = function(str) {
-		return this.slice(0, str.length) == str;
-	};
-};
-
-if (!String.prototype.endsWith) {
-	String.prototype.endsWith = function(pattern) {
-		var d = this.length - pattern.length;
-		return d >= 0 && this.lastIndexOf(pattern) === d;
-	};
-};
-
 MapReduceEditorPage.prototype.loadScript = function() {
 	var fileName = this.file;
 	var headID = document.getElementsByTagName("head")[0];
