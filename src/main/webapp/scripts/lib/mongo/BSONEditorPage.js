@@ -59,7 +59,7 @@ BSONEditorPage.prototype.setError = function(error) {
 };
 BSONEditorPage.prototype.createUI = function(parent) {
 
-	this.editor = new BSONEditor(parent);
+	this.editor = new BSONEditor(parent, 'BSON document', true);
 
 	// load JSON.	
 	var _this = this;

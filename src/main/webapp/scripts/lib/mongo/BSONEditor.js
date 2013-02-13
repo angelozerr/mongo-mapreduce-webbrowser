@@ -5,18 +5,54 @@
  *            HTML element parent where the editor should be added.
  * @constructor
  */
-function BSONEditor(parent) {
-	this.bsonTextarea = this._createUI(parent);
+function BSONEditor(parent, titleLabel, hasURLField) {
+	this.bsonTextarea = this._createUI(parent, titleLabel, hasURLField);
 };
 
 /**
  * Create the UI.
  */
-BSONEditor.prototype._createUI = function(parent) {
+BSONEditor.prototype._createUI = function(parent, titleLabel, /* Boolean */ hasURLField) {
 
+	var toolbarDiv = document.createElement('div');
+	// title
+	var title = document.createElement('span');
+	title.className = "title-editor";
+	title.appendChild(document.createTextNode(titleLabel));
+	toolbarDiv.appendChild(title);	
+	
+	// Format button
+	var _this = this;
+	var formatButton = document.createElement('input');
+	formatButton.type='button';
+	formatButton.value='Format';
+	formatButton.onclick = function() {
+		_this.format();
+	};
+	toolbarDiv.appendChild(formatButton);
+
+	// URL field
+	hasURLField = false;
+	if (hasURLField) {
+		var urlInput = document.createElement('input');
+		urlInput.type = 'text';
+		toolbarDiv.appendChild(urlInput);
+		
+		var loadBSON = function() {
+			alert(urlInput.value);
+		};
+		
+		var urlDropdown = document.createElement('a');
+		urlDropdown.href = "#";
+		urlDropdown.onclick = loadBSON;
+		urlDropdown.appendChild(document.createTextNode("OK"));
+		toolbarDiv.appendChild(urlDropdown);
+	}
+	parent.appendChild(toolbarDiv);
+		
 	var containerDiv = document.createElement('div');
-	containerDiv.className = "bson-editor-container";
-
+	containerDiv.className = "bson-editor-container";	
+	
 	var bsonTextarea = document.createElement('textarea');
 	//bsonTextarea.setAttribute("rows", "10");
 	//bsonTextarea.setAttribute("cols", "150");
@@ -53,14 +89,38 @@ BSONEditor.prototype.getValue = function() {
  * Add the given changed listener.
  */
 BSONEditor.prototype.addChangeListener = function(changeListener) {
-	this.changeListener = changeListener;
+	var _this = this;
+	this.changeListener = function() {
+		if (!_this.dontFireChangeEevent) {
+			changeListener();
+		}
+	}
+};
+
+BSONEditor.prototype.format = function() {
+	try {
+	  this.dontFireChangeEevent = true;
+	  this.setValue(formatter.formatJson(this.getValue(), ' '));
+	}
+	catch(e) {
+		
+	}	
+	finally {
+		this.dontFireChangeEevent = false;
+	}
+};
+
+BSONEditor.prototype.getBSON = function() {
+	var jsonData = this.getValue();
+	return BSON.parseStrict(jsonData)
 };
 
 BSONEditor.prototype.onAfterUI = function() {
 	this.codeMirror = CodeMirror.fromTextArea(this.bsonTextarea, {
 		mode : 'application/json',
 		lineNumbers : true,
-		lineWrapping : true
+		lineWrapping : true,
+		gutters: ["CodeMirror-linenumbers", "syntaxerrors"]
 	});
 	var editor = this.codeMirror;
 	var hlLine = editor.addLineClass(0, "background", "activeline");
@@ -71,7 +131,24 @@ BSONEditor.prototype.onAfterUI = function() {
 	    hlLine = editor.addLineClass(cur, "background", "activeline");
 	  }
 	});
-	if (this.changeListener) {
-		CodeMirror.on(this.codeMirror, "change", this.changeListener);
-	}
+	
+	var validate = function() {
+		editor.jsonlintSyntaxError("lint-error");
+	};
+	
+	var changeListener = this.changeListener;
+	var onEditorChanged = function() {
+		if (changeListener) {
+			changeListener();
+		}
+		validate();
+	};
+	
+	var waiting;
+    editor.on("change", function() {
+	  clearTimeout(waiting);
+	  waiting = setTimeout(onEditorChanged, 500);
+	});
+
+	setTimeout(validate, 100);
 };

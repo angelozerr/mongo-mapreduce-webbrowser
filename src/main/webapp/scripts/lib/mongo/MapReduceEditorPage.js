@@ -23,11 +23,9 @@ SubMapReduceExecutor.prototype.execute = function(index) {
 		_this.resultEditor.setValue(message);
 	};
 
-	var jsonData = this.bsonEditor.getValue();
-
 	var jsonArray = null;
 	try {
-		jsonArray = BSON.parseStrict(jsonData);
+		jsonArray = this.bsonEditor.getBSON();
 	} catch (e) {
 		errorCallback('Error BSON: ' + e);
 		return;
@@ -313,11 +311,11 @@ MapReduceEditorPage.prototype.createUI = function(parent) {
 	for ( var i = 0; i < this.executors.length; i++) {
 		executor = this.executors[i];
 
-		$(parent).append($('<h1>BSON Document</h1>'));
+		//$(parent).append($('<h1>BSON Document</h1>'));
 
 		// BSON textarea
 		var textareaParent = document.createElement('div');
-		var bsonEditor = new BSONEditor(textareaParent);
+		var bsonEditor = new BSONEditor(textareaParent, 'BSON document', true);
 		if (defaultDocument != null) {
 			bsonEditor.setValue(JSON.stringify(defaultDocument, null, ''));
 		}
@@ -384,9 +382,7 @@ MapReduceEditorPage.prototype.createUI = function(parent) {
 		table.appendChild(tr);
 		parent.appendChild(table);
 
-		$(parent).append($('<h1>Result</h1>'));
-
-		var resultEditor = new BSONEditor(parent);
+		var resultEditor = new BSONEditor(parent, 'Result', false);
 		executor.resultEditor = resultEditor;
 
 	}
