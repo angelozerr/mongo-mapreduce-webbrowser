@@ -124,7 +124,7 @@ ScriptEditor.prototype.onAfterUI = function() {
 		if (changeListener) {
 			changeListener();
 		}
-		validate();
+		//validate();
 	};
 	
 	var waiting;
@@ -133,5 +133,5 @@ ScriptEditor.prototype.onAfterUI = function() {
 	  waiting = setTimeout(onEditorChanged, 500);
 	});
 
-	setTimeout(validate, 100);
+	//setTimeout(validate, 100);
 };
