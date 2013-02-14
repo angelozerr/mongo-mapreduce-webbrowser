@@ -5,14 +5,15 @@
  *            HTML element parent where the editor should be added.
  * @constructor
  */
-function BSONEditor(parent, titleLabel, hasURLField) {
-	this.bsonTextarea = this._createUI(parent, titleLabel, hasURLField);
+function BSONEditor(parent, titleLabel, editable) {
+	this.editable = editable;
+	this.bsonTextarea = this._createUI(parent, titleLabel, editable);
 };
 
 /**
  * Create the UI.
  */
-BSONEditor.prototype._createUI = function(parent, titleLabel, /* Boolean */ hasURLField) {
+BSONEditor.prototype._createUI = function(parent, titleLabel, /* Boolean */ editable) {
 
 	var toolbarDiv = document.createElement('div');
 	// title
@@ -32,7 +33,7 @@ BSONEditor.prototype._createUI = function(parent, titleLabel, /* Boolean */ hasU
 	toolbarDiv.appendChild(formatButton);
 
 	// URL field
-	hasURLField = false;
+	var hasURLField = false;
 	if (hasURLField) {
 		var urlInput = document.createElement('input');
 		urlInput.type = 'text';
@@ -132,14 +133,16 @@ BSONEditor.prototype.onAfterUI = function() {
 	  }
 	});
 	
+	var _this= this;
 	var validate = function() {
-		editor.jsonlintSyntaxError("lint-error");
+		if (_this.editable) {
+			CodeMirror.validate(editor, CodeMirror.jsonValidator);
+		}
 	};
 	
-	var changeListener = this.changeListener;
 	var onEditorChanged = function() {
-		if (changeListener) {
-			changeListener();
+		if (_this.changeListener) {
+			_this.changeListener();
 		}
 		validate();
 	};

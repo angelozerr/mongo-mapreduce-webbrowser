@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>CodeMirror: Inline Widget Demo</title>
+    
+<link rel="stylesheet" type="text/css" href="css/codemirror.css" />
+	<link rel="stylesheet" type="text/css" href="css/codemirror-validator.css" />
+	
+	<script src="scripts/lib/jshint/jshint-r12-80277ef.js"></script>
+			
+	<script src="scripts/lib/codemirror/codemirror.js"></script>
+	<script src="scripts/lib/codemirror/mode/javascript.js"></script>
+	<script src="scripts/lib/codemirror/addon/validator/validator.js"></script>
+	<script src="scripts/lib/codemirror/addon/validator/javascript-validator.js"></script>
+	
+    <style type="text/css">
+      .CodeMirror {border: 1px solid black;}    
+    </style>
+  </head>
+  <body>
+    <h1>CodeMirror: Javascript Editor</h1>
+
+    <textarea id="code">var widgets = []
+function updateHints() {
+  editor.operation(function(){
+    for (var i = 0; i < widgets.length; ++i)
+      editor.removeLineWidget(widgets[i]);
+    widgets.length = 0;
+
+    JSHINT(editor.getValue());
+    for (var i = 0; i < JSHINT.errors.length; ++i) {
+      var err = JSHINT.errors[i];
+      if (!err) continue;
+      var msg = document.createElement("div");
+      var icon = msg.appendChild(document.createElement("span"));
+      icon.innerHTML = "!!";
+      icon.className = "lint-error-icon";
+      msg.appendChild(document.createTextNode(err.reason));
+      msg.className = "lint-error";
+      widgets.push(editor.addLineWidget(err.line - 1, msg, {coverGutter: false, noHScroll: true}));
+    }
+  });
+  var info = editor.getScrollInfo();
+  var after = editor.charCoords({line: editor.getCursor().line + 1, ch: 0}, "local").top;
+  if (info.top + info.clientHeight < after)
+    editor.scrollTo(null, after - info.clientHeight + 3);
+}
+</textarea>
+
+<script>
+window.onload = function() {
+  // Create CodeMirror Editor with JSON mode
+  var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+    lineNumbers: true,
+    mode: "application/javascript",
+    gutters: ["CodeMirror-linenumbers", "syntaxerrors"]
+  });
+  window.editor = editor;
+  
+  // Highlight current line.
+  var hlLine = editor.addLineClass(0, "background", "activeline");
+  editor.on("cursorActivity", function() {
+	var cur = editor.getLineHandle(editor.getCursor().line);
+	if (cur != hlLine) {
+	  editor.removeLineClass(hlLine, "background", "activeline");
+	  hlLine = editor.addLineClass(cur, "background", "activeline");
+	}
+  });
+  
+  // Manage syntax error with JSONLint.
+  var validate = function() {
+  	CodeMirror.validate(editor, CodeMirror.javascriptValidator);  	
+  };
+  var waiting;
+  editor.on("change", function() {
+	clearTimeout(waiting);
+	waiting = setTimeout(validate, 500);
+  });
+
+  setTimeout(validate, 100);
+};
+</script>
+
+<p>This demo runs <a href="http://jshint.com">JSHint</a> over the code
+in the editor (which is the script used on this page), and
+inserts <a href="../doc/manual.html#addLineWidget">line widgets</a> to
+display the warnings that JSHint comes up with.</p>
+  </body>
+</html>
