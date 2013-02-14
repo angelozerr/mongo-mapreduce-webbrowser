@@ -10,7 +10,7 @@ CodeMirror.validate = function(cm, collectAnnotations, options) {
 		var id = 'tt';
 		var top = 3;
 		var left = 3;
-		var maxw = 300;
+		var maxw = 600;
 		var speed = 10;
 		var timer = 20;
 		var endalpha = 95;
@@ -18,7 +18,7 @@ CodeMirror.validate = function(cm, collectAnnotations, options) {
 		var tt, t, c, b, h;
 		var ie = document.all ? true : false;
 		return {
-			show : function(v, w) {
+			show : function(v, w, severity) {
 				if (tt == null) {
 					tt = document.createElement('div');
 					tt.setAttribute('id', id);
@@ -108,10 +108,16 @@ CodeMirror.validate = function(cm, collectAnnotations, options) {
 	}
 
 	function makeMarker(description, severity) {
-		var message = '<pre>' + description + '</pre>'
+		// <div class="annotationHTML error"></div>&nbsp;<span style="vertical-align:middle;">Cannot find module 'require'</span><div>		
+		var message = '<div class="annotationHTML ' + severity + '">';
+		message += '</div>';
+		message += '&nbsp;<span style="vertical-align:middle;">';
+		message += description;
+		message += '</span>';
+		
 		var marker = document.createElement("div");
 		marker.onmouseover = function() {
-			tooltip.show(message, 200);
+			tooltip.show(message, null, severity);
 		};
 		marker.onmouseout = function() {
 			tooltip.hide();

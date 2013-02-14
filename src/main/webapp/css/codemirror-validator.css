@@ -35,6 +35,17 @@
 	background-image: url("data:image/gif;base64,R0lGODlhEAAQANUAAP7bc//egf/ij/7ijv/jl/7kl//mnv7lnv/uwf7CTP7DTf7DT/7IW//Na/7Na//NbP7QdP/dmbltAIJNAF03AMSAJMSCLKqASa2DS6uBSquCSrGHTq6ETbCHT7WKUrKIUcCVXL+UXMOYX8GWXsSZYMiib6+ETbOIUcOXX86uhd3Muf///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAACsALAAAAAAQABAAAAZowJVwSCwaj0ihikRSJYcoBEL0XKlGkcjImQQhJBREKFnyICoThKeE/AAW6AXgdPyUAgrLJBEo0YsbAQyDhAEdRRwDDw8OaA4NDQImRBgFEJdglxAEGEQZKQcHBqOkKRpFF6mqq1WtrUEAOw==");
 }
 
+/* Styles for the overview ruler  */
+.annotationOverview {
+	cursor: pointer;
+	border-radius: 2px;
+	left: 2px;
+	width: 8px;
+}
+.annotationOverview.error {
+	background-color: lightcoral;
+	border: 1px solid darkred;
+}
 .annotationOverview.warning {
 	background-color: Gold;
 	border: 1px solid black;
@@ -44,33 +55,48 @@
 	width: .8em;
 }
 
-.syntaxerror {
-	color: #822;
+.textviewTooltip {
+    background-color: infobackground;
+    border: 1px solid black;
+    border-radius: 4px 4px 4px 4px;
+    color: infotext;
+    font-family: monospace;
+    font-size: 10pt;
+    overflow: hidden;
+    padding: 2px;
+    position: fixed;
+    white-space: pre;
+    z-index: 100;
 }
 
 #tt {
-	position: absolute;
-	display: block;
+	//position: absolute;
+	//display: block;
+	background-color: infobackground;
+    border: 1px solid black;
+    border-radius: 4px 4px 4px 4px;
+    color: infotext;
+    font-family: monospace;
+    font-size: 10pt;
+    overflow: hidden;
+    padding: 2px;
+    position: fixed;
+    white-space: pre;
+    z-index: 100;
 }
 
 #tttop {
-	display: block;
-	height: 5px;
-	margin-left: 5px;
-	overflow: hidden;
+	display: hidden;
 }
 
 #ttcont {
 	display: block;
 	padding: 2px 12px 3px 7px;
 	margin-left: 5px;
-	background: #666;
-	color: #fff;
+//	background: #666;
+//	color: #fff;
 }
 
 #ttbot {
-	display: block;
-	height: 5px;
-	margin-left: 5px;
-	overflow: hidden;
+	dispslay:hidden;
 }
