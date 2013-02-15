@@ -123,7 +123,7 @@ BSONEditor.prototype.onAfterUI = function() {
 		lineWrapping : true,
 		matchBrackets: true,
 		autoCloseBrackets: true,
-		gutters: ["CodeMirror-linenumbers", "syntaxerrors"]
+		gutters: ["CodeMirror-linenumbers", "CodeMirror-lints"]
 	});
 	var editor = this.codeMirror;
 	var hlLine = editor.addLineClass(0, "background", "activeline");

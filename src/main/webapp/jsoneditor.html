@@ -5,15 +5,15 @@
     <title>CodeMirror: JSON Editor Demo</title>
     
 	<link rel="stylesheet" type="text/css" href="css/codemirror.css" />
-	<link rel="stylesheet" type="text/css" href="css/codemirror-validator.css" />
+	<link rel="stylesheet" type="text/css" href="css/codemirror-lint.css" />
 	
 	<script src="scripts/lib/jsonlint/jsonlint.js"></script>
 	<script src="scripts/lib/jsonlint/formatter.js"></script>
 			
 	<script src="scripts/lib/codemirror/codemirror.js"></script>
 	<script src="scripts/lib/codemirror/mode/javascript.js"></script>
-	<script src="scripts/lib/codemirror/addon/validator/validator.js"></script>
-	<script src="scripts/lib/codemirror/addon/validator/json-validator.js"></script>
+	<script src="scripts/lib/codemirror/addon/lint/lint.js"></script>
+	<script src="scripts/lib/codemirror/addon/lint/json-lint.js"></script>
 	<script src="scripts/lib/codemirror/addon/edit/matchbrackets.js"></script>
 	<script src="scripts/lib/codemirror/addon/edit/closebrackets.js"></script>
 	
@@ -66,7 +66,7 @@ window.onload = function() {
     mode: "application/json",
     matchBrackets: true,
     autoCloseBrackets: true,
-    gutters: ["CodeMirror-linenumbers", "syntaxerrors"]
+    gutters: ["CodeMirror-linenumbers", "CodeMirror-lints"]
   });
   window.editor = editor;
   

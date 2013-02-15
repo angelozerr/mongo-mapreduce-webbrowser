@@ -51,8 +51,15 @@
 	border: 1px solid black;
 }
 
-.syntaxerrors {
-	width: .8em;
+.annotationHTML.overlay {
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAAAXNSR0IArs4c6QAAAAZiS0dEAAAAAAAA+UO7fwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sJEAQvB2JVdrAAAAAdaVRYdENvbW1lbnQAAAAAAENyZWF0ZWQgd2l0aCBHSU1QZC5lBwAAAD1JREFUCNdtjkESADAEAzemf69f66HMqGlOIhYiFRFRtSQBWAY7mzx+EDTL6sSgb1jTk7Q87rxyqe37fXsAa78gLyZnRgEAAAAASUVORK5CYII=");
+    background-position: right bottom;
+    position: relative;
+    top: -16px;
+}
+
+.CodeMirror-lints {
+	width: 16px;
 }
 
 .textviewTooltip {

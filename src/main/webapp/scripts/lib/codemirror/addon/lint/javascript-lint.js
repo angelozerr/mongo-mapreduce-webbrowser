@@ -16,12 +16,12 @@
 			"Unmatched ", " and instead saw", " is not defined",
 			"Unclosed string", "Stopping, unable to continue" ];
 
-	CodeMirror.javascriptValidator = function(contents, annotations) {
+	CodeMirror.javascriptValidator = function(contents, collector, cm) {
 		var positionalAdjustment = 1;
 		var result = jshint(contents);
 		var errors = result.errors;
 		if (errors) {
-			parseErrors(errors, positionalAdjustment, annotations);
+			parseErrors(errors, positionalAdjustment, collector);
 		}
 	};
 
@@ -68,10 +68,9 @@
 		return false;
 	}
 
-	function parseErrors(errors, positionalAdjustment, annotations) {
-		return errors.reduce(reduceErrors, annotations);
-
-		function reduceErrors(annotations, error) {
+	function parseErrors(errors, positionalAdjustment, collector) {
+		for ( var i = 0; i < errors.length; i++) {
+			error = errors[i];
 			if (error) {
 				var linetabpositions, index;
 
@@ -134,18 +133,12 @@
 					var lineEnd = error.line - 1;
 					var charEnd = end;
 					var description = error.description;
-					annotations.push({
-						"severity" : severity,
-						"lineStart" : lineStart,
-						"charStart" : charStart,
-						"lineEnd" : lineEnd,
-						"charEnd" : charEnd,
-						"description" : description
-					});
+					
+					collector.addAnnotation(severity, lineStart, charStart,
+							lineEnd, charEnd, description);
+					
 				}
 			}
-
-			return annotations;
 		}
 	}
 })();
