@@ -121,6 +121,7 @@ BSONEditor.prototype.onAfterUI = function() {
 		mode : 'application/json',
 		lineNumbers : true,
 		lineWrapping : true,
+		matchBrackets: true,
 		gutters: ["CodeMirror-linenumbers", "syntaxerrors"]
 	});
 	var editor = this.codeMirror;

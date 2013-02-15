@@ -14,12 +14,14 @@
 	<script src="scripts/lib/codemirror/mode/javascript.js"></script>
 	<script src="scripts/lib/codemirror/addon/validator/validator.js"></script>
 	<script src="scripts/lib/codemirror/addon/validator/json-validator.js"></script>
+	<script src="scripts/lib/codemirror/addon/edit/matchbrackets.js"></script>
 	
     <link rel="stylesheet" href="css/docs.css">
 
     <style type="text/css">
       .CodeMirror {border: 1px solid black;}
       .activeline {background: #e8f2ff !important;}
+      div.CodeMirror span.CodeMirror-matchingbracket{color:black;font-weight:bold;}
     </style>
   </head>
   <body>
@@ -61,6 +63,7 @@ window.onload = function() {
   var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
     lineNumbers: true,
     mode: "application/json",
+    matchBrackets: true,
     gutters: ["CodeMirror-linenumbers", "syntaxerrors"]
   });
   window.editor = editor;
