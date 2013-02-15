@@ -62,6 +62,7 @@ ScriptEditor.prototype.onAfterUI = function() {
 		lineNumbers : true,
 		lineWrapping : true,
 		matchBrackets: true,
+		autoCloseBrackets: true,
 		gutters: ["CodeMirror-linenumbers", "syntaxerrors"]
 	});
 	var editor = this.codeMirror;

@@ -14,6 +14,7 @@
 	<script src="scripts/lib/codemirror/addon/validator/validator.js"></script>
 	<script src="scripts/lib/codemirror/addon/validator/javascript-validator.js"></script>
 	<script src="scripts/lib/codemirror/addon/edit/matchbrackets.js"></script>
+	<script src="scripts/lib/codemirror/addon/edit/closebrackets.js"></script>
 	
     <style type="text/css">
       .CodeMirror {border: 1px solid black;} 
@@ -58,6 +59,7 @@ window.onload = function() {
     lineNumbers: true,
     mode: "application/javascript",
     matchBrackets: true,
+    autoCloseBrackets: true,
     gutters: ["CodeMirror-linenumbers", "syntaxerrors"]
   });
   window.editor = editor;

@@ -15,6 +15,7 @@
 	<script src="scripts/lib/codemirror/addon/validator/validator.js"></script>
 	<script src="scripts/lib/codemirror/addon/validator/json-validator.js"></script>
 	<script src="scripts/lib/codemirror/addon/edit/matchbrackets.js"></script>
+	<script src="scripts/lib/codemirror/addon/edit/closebrackets.js"></script>
 	
     <link rel="stylesheet" href="css/docs.css">
 
@@ -64,6 +65,7 @@ window.onload = function() {
     lineNumbers: true,
     mode: "application/json",
     matchBrackets: true,
+    autoCloseBrackets: true,
     gutters: ["CodeMirror-linenumbers", "syntaxerrors"]
   });
   window.editor = editor;
