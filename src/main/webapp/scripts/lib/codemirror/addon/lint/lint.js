@@ -110,19 +110,11 @@ CodeMirror.validate = function(cm, collectAnnotations, options) {
 		state.marked = [];
 	}
 
-	function makeMarker(message, maxSeverity, multiple) {
-		// <div class="annotationHTML error"></div>&nbsp;<span
-		// style="vertical-align:middle;">Cannot find module
-		// 'require'</span><div>
+	function makeMarker(tooltipLabel, maxSeverity, multiple) {
 
-		/*<div class="annotation error" style="height: 14px;">
-		<div class="annotationHTML error"></div>
-		<div class="annotationHTML overlay"></div>
-		</div>*/
-		
 		var marker = document.createElement("div");
 		marker.onmouseover = function() {
-			tooltip.show(message, null, maxSeverity);
+			tooltip.show(tooltipLabel, null, maxSeverity);
 		};
 		marker.onmouseout = function() {
 			tooltip.hide();
@@ -175,6 +167,57 @@ CodeMirror.validate = function(cm, collectAnnotations, options) {
 		}
 		return severity2;
 	}
+	
+	function getTooltipLabel(content, multiple) {
+		var label = '<div style="height: auto; width: auto;">';		
+		if (multiple) {
+			label += '<div><em>Multiple Annotations</em></div>';
+		}
+		label += '<div>';
+		label += content;
+		label += '</div>';
+		label += '</div>';
+		return label;
+	}
+	
+	function getTooltipAnnotationLabel(description, severity) {
+		var label = '<div>';
+		label += '<div class="annotationHTML ' + severity + '">';
+		label += '</div>';
+		label += '&nbsp;<span style="vertical-align:middle;">';
+		label += description;
+		label += '</span>';
+		label += '</div>';		
+		return label;
+	}
+	
+	function makeMarkText(severity, lineStart, charStart, lineEnd, charEnd, annotationLabel) {
+		var markClass = 'annotationRange ' + severity;
+		var mark = cm.markText({
+			line : lineStart,
+			ch : charStart
+		}, {
+			line : lineEnd,
+			ch : charEnd
+		}, {
+			className : markClass,
+			readOnly : false
+		});
+		
+		// save mark text in an array which is used to clean mark
+		var state = getSyntaxErrorHighlightState(cm);
+		state.marked.push(mark);
+		
+		var tooltipLabel = getTooltipLabel(annotationLabel, false);
+		// TODO : add tooltip for mark text. How to manage that???
+		// I would like do like this
+		/*mark.onmouseover = function() {
+			tooltip.show(tooltipLabel, null, severity);
+		};
+		mark.onmouseout = function() {
+			tooltip.hide();
+		};*/				
+	}
 
 	function markDocument() {
 		var gutterID = GUTTER_ID;
@@ -197,13 +240,9 @@ CodeMirror.validate = function(cm, collectAnnotations, options) {
 			// - create a tooltip with the list of annotations
 
 			var maxSeverity = null;
-			var message = '<div style="height: auto; width: auto;">';
-			
+			var markerTooltipLabel = '';			
 			var multiple = annotations.length > 1; 
-			if (multiple) {
-				message += '<div><em>Multiple Annotations</em></div>';
-			}
-			message += '<div>';
+			
 			// create a markText for each annotations
 			for ( var j = 0; j < annotations.length; j++) {
 				var annotation = annotations[j];
@@ -212,6 +251,7 @@ CodeMirror.validate = function(cm, collectAnnotations, options) {
 				}
 
 				// Create mark text
+				
 				var severity = annotation.severity;
 				var lineStart = annotation.lineStart;
 				var charStart = annotation.charStart;
@@ -219,37 +259,17 @@ CodeMirror.validate = function(cm, collectAnnotations, options) {
 				var charEnd = annotation.charEnd;
 				var description = annotation.description;
 
-				var markClass = 'annotationRange ' + severity;
-				var mark = cm.markText({
-					line : lineStart,
-					ch : charStart
-				}, {
-					line : lineEnd,
-					ch : charEnd
-				}, {
-					className : markClass,
-					readOnly : false
-				});
-
-				var state = getSyntaxErrorHighlightState(cm);
-				state.marked.push(mark);
-
-				message += '<div>';
-				message += '<div class="annotationHTML ' + severity + '">';
-				message += '</div>';
-				message += '&nbsp;<span style="vertical-align:middle;">';
-				message += description;
-				message += '</span>';
-				message += '</div>';
+				var annotationLabel = getTooltipAnnotationLabel(description, severity);
+				makeMarkText(severity, lineStart, charStart, lineEnd, charEnd, annotationLabel);																
 				
+				markerTooltipLabel+=annotationLabel;				
 				maxSeverity = getMaxSeverity(maxSeverity, severity);
 			}
-			message += '</div>';
-			message+='</div>';
+			markerTooltipLabel = getTooltipLabel(markerTooltipLabel, multiple);
 
 			
 			// create a tooltip with the list of annotations
-			var marker = makeMarker(message, maxSeverity, multiple);
+			var marker = makeMarker(markerTooltipLabel, maxSeverity, multiple);
 
 			var info = cm.lineInfo(line);
 			cm.setGutterMarker(line, gutterID, info.gutterMarkers ? null
