@@ -15,22 +15,24 @@ CodeMirror.validate = function(cm, collectAnnotations, options) {
 		var timer = 20;
 		var endalpha = 95;
 		var alpha = 0;
-		var tt, t, c, b, h;
+		//var tt, t, c, b, h;
+		var tt, c, h;
 		var ie = document.all ? true : false;
 		return {
 			show : function(v, w, severity) {
 				if (tt == null) {
 					tt = document.createElement('div');
 					tt.setAttribute('id', id);
-					t = document.createElement('div');
-					t.setAttribute('id', id + 'top');
+					tt.className = 'textviewTooltip';
+					//t = document.createElement('div');
+					//t.setAttribute('id', id + 'top');
 					c = document.createElement('div');
 					c.setAttribute('id', id + 'cont');
-					b = document.createElement('div');
-					b.setAttribute('id', id + 'bot');
-					tt.appendChild(t);
+					//b = document.createElement('div');
+					//b.setAttribute('id', id + 'bot');
+					//tt.appendChild(t);
 					tt.appendChild(c);
-					tt.appendChild(b);
+					//tt.appendChild(b);
 					document.body.appendChild(tt);
 					tt.style.opacity = 0;
 					tt.style.filter = 'alpha(opacity=0)';
@@ -40,11 +42,11 @@ CodeMirror.validate = function(cm, collectAnnotations, options) {
 				c.innerHTML = v;
 				tt.style.width = w ? w + 'px' : 'auto';
 				if (!w && ie) {
-					t.style.display = 'none';
-					b.style.display = 'none';
+					//t.style.display = 'none';
+					//b.style.display = 'none';
 					tt.style.width = tt.offsetWidth;
-					t.style.display = 'block';
-					b.style.display = 'block';
+					//t.style.display = 'block';
+					//b.style.display = 'block';
 				}
 				if (tt.offsetWidth > maxw) {
 					tt.style.width = maxw + 'px'

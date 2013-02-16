@@ -76,34 +76,10 @@
     z-index: 100;
 }
 
-#tt {
-	//position: absolute;
-	//display: block;
-	background-color: infobackground;
-    border: 1px solid black;
-    border-radius: 4px 4px 4px 4px;
-    color: infotext;
-    font-family: monospace;
-    font-size: 10pt;
-    overflow: hidden;
-    padding: 2px;
-    position: fixed;
-    white-space: pre;
-    z-index: 100;
-}
-
-#tttop {
-	display: hidden;
-}
-
 #ttcont {
-	display: block;
-	padding: 2px 12px 3px 7px;
+	//display: block;
+	//padding: 2px 12px 3px 7px;
 	margin-left: 5px;
 //	background: #666;
 //	color: #fff;
-}
-
-#ttbot {
-	dispslay:hidden;
 }
