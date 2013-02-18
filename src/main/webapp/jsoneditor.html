@@ -16,12 +16,13 @@
 	<script src="scripts/lib/codemirror/addon/lint/json-lint.js"></script>
 	<script src="scripts/lib/codemirror/addon/edit/matchbrackets.js"></script>
 	<script src="scripts/lib/codemirror/addon/edit/closebrackets.js"></script>
+	<script src="scripts/lib/codemirror/addon/selection/active-line.js"></script>
 	
     <link rel="stylesheet" href="css/docs.css">
 
     <style type="text/css">
       .CodeMirror {border: 1px solid black;}
-      .activeline {background: #e8f2ff !important;}
+      .CodeMirror-activeline-background {background: #e8f2ff !important;}
       div.CodeMirror span.CodeMirror-matchingbracket{color:black;font-weight:bold;}
     </style>
   </head>
@@ -63,6 +64,7 @@ window.onload = function() {
   // Create CodeMirror Editor with JSON mode
   var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
     lineNumbers: true,
+    styleActiveLine: true,
     mode: "application/json",
     matchBrackets: true,
     autoCloseBrackets: true,
@@ -70,17 +72,7 @@ window.onload = function() {
     lintWith: CodeMirror.jsonValidator
   });
   window.editor = editor;
-  
-  // Highlight current line.
-  var hlLine = editor.addLineClass(0, "background", "activeline");
-  editor.on("cursorActivity", function() {
-	var cur = editor.getLineHandle(editor.getCursor().line);
-	if (cur != hlLine) {
-	  editor.removeLineClass(hlLine, "background", "activeline");
-	  hlLine = editor.addLineClass(cur, "background", "activeline");
-	}
-  });
-    
+      
 };
 
 </script>

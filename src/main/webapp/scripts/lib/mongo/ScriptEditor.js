@@ -79,6 +79,7 @@ ScriptEditor.prototype.onAfterUI = function() {
 	this.codeMirror = CodeMirror.fromTextArea(this.scriptTextarea, {
 		mode : 'javascript',
 		lineNumbers : true,
+		styleActiveLine: true,
 		lineWrapping : true,
 		matchBrackets : true,
 		autoCloseBrackets : true,
@@ -88,36 +89,9 @@ ScriptEditor.prototype.onAfterUI = function() {
 			"formatAnnotation" : myFormatAnnotation
 		}
 	});
-	var editor = this.codeMirror;
-	var hlLine = editor.addLineClass(0, "background", "activeline");
-	editor.on("cursorActivity", function() {
-		var cur = editor.getLineHandle(editor.getCursor().line);
-		if (cur != hlLine) {
-			editor.removeLineClass(hlLine, "background", "activeline");
-			hlLine = editor.addLineClass(cur, "background", "activeline");
-		}
-	});
+	var editor = this.codeMirror;	
 
 	var changeListener = this.changeListener;
-	var widgets = []
-	var validate = function() {
-		CodeMirror.validate(editor, CodeMirror.javascriptValidator,
-				{
-					getContents : function() {
-						return 'var f=' + editor.getValue() + ';';
-					},
-					formatAnnotation : function(annotation) {
-						if (annotation.lineStart == 0) {
-							annotation.charStart = annotation.charStart
-									- ('var f='.length);
-							annotation.charEnd = annotation.charEnd
-									- ('var f='.length);
-						}
-						return annotation;
-					}
-				});
-	};
-
 	var onEditorChanged = function() {
 		if (changeListener) {
 			changeListener();

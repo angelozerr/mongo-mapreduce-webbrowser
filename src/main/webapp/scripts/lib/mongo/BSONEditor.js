@@ -129,21 +129,14 @@ BSONEditor.prototype.onAfterUI = function() {
 	this.codeMirror = CodeMirror.fromTextArea(this.bsonTextarea, {
 		mode : 'application/json',
 		lineNumbers : true,
+		styleActiveLine: true,
 		lineWrapping : true,
 		matchBrackets: true,
 		autoCloseBrackets: true,
 		gutters: ["CodeMirror-linenumbers", "CodeMirror-lint-markers"],
 		lintWith: myJsonValidator
 	});
-	var editor = this.codeMirror;
-	var hlLine = editor.addLineClass(0, "background", "activeline");
-	editor.on("cursorActivity", function() {
-	  var cur = editor.getLineHandle(editor.getCursor().line);
-	  if (cur != hlLine) {
-	    editor.removeLineClass(hlLine, "background", "activeline");
-	    hlLine = editor.addLineClass(cur, "background", "activeline");
-	  }
-	});
+	var editor = this.codeMirror;	
 	
 	var _this= this;
 	var onEditorChanged = function() {

@@ -161,8 +161,6 @@ header {
 	border: 1px solid black;
 }
 
-.activeline {
-	background: #e8f2ff !important;
-}
+.CodeMirror-activeline-background {background: #e8f2ff !important;}
 
 div.CodeMirror span.CodeMirror-matchingbracket{color:black;font-weight:bold;}
