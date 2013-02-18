@@ -430,18 +430,6 @@ window.CodeMirror = (function() {
     var gutterW = display.sizer.style.marginLeft = display.gutters.offsetWidth + "px";
     display.scrollbarH.style.left = cm.options.fixedGutter ? gutterW : "0";
 
-    // When merged lines are present, the line that needs to be
-    // redrawn might not be the one that was changed.
-    if (sawCollapsedSpans)
-      for (var i = 0; i < changes.length; ++i) {
-        var ch = changes[i], merged;
-        while (merged = collapsedSpanAtStart(getLine(doc, ch.from))) {
-          var from = merged.find().from.line;
-          if (ch.diff) ch.diff -= ch.from - from;
-          ch.from = from;
-        }
-      }
-
     // Used to determine which lines need their line numbers updated
     var positionsChangedFrom = Infinity;
     if (cm.options.lineNumbers)
@@ -460,7 +448,22 @@ window.CodeMirror = (function() {
 
     // Create a range of theoretically intact lines, and punch holes
     // in that using the change info.
-    var intact = computeIntact([{from: display.showingFrom, to: display.showingTo}], changes);
+    var intact = [{from: Math.max(display.showingFrom, doc.first),
+                   to: Math.min(display.showingTo, end)}];
+    if (intact[0].from >= intact[0].to) intact = [];
+    else intact = computeIntact(intact, changes);
+    // When merged lines are present, we might have to reduce the
+    // intact ranges because changes in continued fragments of the
+    // intact lines do require the lines to be redrawn.
+    if (sawCollapsedSpans)
+      for (var i = 0; i < intact.length; ++i) {
+        var range = intact[i], merged;
+        while (merged = collapsedSpanAtEnd(getLine(doc, range.to - 1))) {
+          var newTo = merged.find().from.line;
+          if (newTo > range.from) range.to = newTo;
+          else { intact.splice(i--, 1); break; }
+        }
+      }
 
     // Clip off the parts that won't be visible
     var intactLines = 0;
@@ -512,7 +515,7 @@ window.CodeMirror = (function() {
     }
     updateViewOffset(cm);
 
-    if (visibleLines(display, doc, viewPort).to >= to)
+    if (visibleLines(display, doc, viewPort).to > to)
       updateDisplayInner(cm, [], viewPort);
     return true;
   }
@@ -1116,7 +1119,7 @@ window.CodeMirror = (function() {
     if (y < 0) return PosMaybeOutside(doc.first, 0, true);
     var lineNo = lineAtHeight(doc, y), last = doc.first + doc.size - 1;
     if (lineNo > last)
-      return PosMaybeOutside(doc.size - 1, getLine(doc, last).text.length, true);
+      return PosMaybeOutside(doc.first + doc.size - 1, getLine(doc, last).text.length, true);
     if (x < 0) x = 0;
 
     for (;;) {
@@ -1241,7 +1244,7 @@ window.CodeMirror = (function() {
     var newScrollPos, updated;
     if (op.updateScrollPos) {
       newScrollPos = op.updateScrollPos;
-    } else if (op.selectionChanged) {
+    } else if (op.selectionChanged && display.scroller.clientHeight) { // don't rescroll if not visible
       var coords = cursorCoords(cm, doc.sel.head);
       newScrollPos = calculateScrollPos(cm, coords.left, coords.top, coords.left, coords.bottom);
     }
@@ -1446,7 +1449,7 @@ window.CodeMirror = (function() {
 
     on(d.input, "keyup", operation(cm, function(e) {
       if (cm.options.onKeyEvent && cm.options.onKeyEvent(cm, addStop(e))) return;
-      if (e_prop(e, "keyCode") == 16) cm.doc.sel.shift = false;
+      if (e.keyCode == 16) cm.doc.sel.shift = false;
     }));
     on(d.input, "input", bind(fastPoll, cm));
     on(d.input, "keydown", operation(cm, onKeyDown));
@@ -1517,7 +1520,7 @@ window.CodeMirror = (function() {
   var lastClick, lastDoubleClick;
   function onMouseDown(e) {
     var cm = this, display = cm.display, doc = cm.doc, sel = doc.sel;
-    sel.shift = e_prop(e, "shiftKey");
+    sel.shift = e.shiftKey;
 
     if (eventInWidget(display, e)) {
       if (!webkit) {
@@ -1886,7 +1889,7 @@ window.CodeMirror = (function() {
     if (!name) return false;
     var keymaps = allKeyMaps(cm);
 
-    if (e_prop(e, "shiftKey")) {
+    if (e.shiftKey) {
       // First try to resolve full name (including 'Shift-'). Failing
       // that, see if there is a cursor-motion command (starting with
       // 'go') bound to the keyname without 'Shift-'.
@@ -1923,15 +1926,15 @@ window.CodeMirror = (function() {
     if (!cm.state.focused) onFocus(cm);
     if (ie && e.keyCode == 27) { e.returnValue = false; }
     if (cm.options.onKeyEvent && cm.options.onKeyEvent(cm, addStop(e))) return;
-    var code = e_prop(e, "keyCode");
+    var code = e.keyCode;
     // IE does strange things with escape.
-    cm.doc.sel.shift = code == 16 || e_prop(e, "shiftKey");
+    cm.doc.sel.shift = code == 16 || e.shiftKey;
     // First give onKeyEvent option a chance to handle this.
     var handled = handleKeyBinding(cm, e);
     if (opera) {
       lastStoppedKey = handled ? code : null;
       // Opera has no cut event... we try to at least catch the key combo
-      if (!handled && code == 88 && !hasCopyEvent && e_prop(e, mac ? "metaKey" : "ctrlKey"))
+      if (!handled && code == 88 && !hasCopyEvent && (mac ? e.metaKey : e.ctrlKey))
         cm.replaceSelection("");
     }
   }
@@ -1939,7 +1942,7 @@ window.CodeMirror = (function() {
   function onKeyPress(e) {
     var cm = this;
     if (cm.options.onKeyEvent && cm.options.onKeyEvent(cm, addStop(e))) return;
-    var keyCode = e_prop(e, "keyCode"), charCode = e_prop(e, "charCode");
+    var keyCode = e.keyCode, charCode = e.charCode;
     if (opera && keyCode == lastStoppedKey) {lastStoppedKey = null; e_preventDefault(e); return;}
     if (((opera && (!e.which || e.which < 10)) || khtml) && handleKeyBinding(cm, e)) return;
     var ch = String.fromCharCode(charCode == null ? keyCode : charCode);
@@ -2034,9 +2037,28 @@ window.CodeMirror = (function() {
                lst(change.text).length + (change.text.length == 1 ? change.from.ch : 0));
   }
 
+  // Make sure a position will be valid after the given change.
+  function clipPostChange(doc, change, pos) {
+    if (!posLess(change.from, pos)) return clipPos(doc, pos);
+    var diff = (change.text.length - 1) - (change.to.line - change.from.line);
+    if (pos.line > change.to.line + diff) {
+      var preLine = pos.line - diff, lastLine = doc.first + doc.size - 1;
+      if (preLine > lastLine) return Pos(lastLine, getLine(doc, lastLine).text.length);
+      return clipToLen(pos, getLine(doc, preLine).text.length);
+    }
+    if (pos.line == change.to.line + diff)
+      return clipToLen(pos, lst(change.text).length + (change.text.length == 1 ? change.from.ch : 0) +
+                       getLine(doc, change.to.line).text.length - change.to.ch);
+    var inside = pos.line - change.from.line;
+    return clipToLen(pos, change.text[inside].length + (inside ? 0 : change.from.ch));
+  }
+
   // Hint can be null|"end"|"start"|"around"|{anchor,head}
-  function computeSelAfterChange(sel, change, hint) {
-    if (hint && typeof hint == "object") return hint; // Assumed to be {from, to} object
+  function computeSelAfterChange(doc, change, hint) {
+    if (hint && typeof hint == "object") // Assumed to be {anchor, head} object
+      return {anchor: clipPostChange(doc, change, hint.anchor),
+              head: clipPostChange(doc, change, hint.head)};
+
     if (hint == "start") return {anchor: change.from, head: change.from};
     
     var end = changeEnd(change);
@@ -2052,7 +2074,7 @@ window.CodeMirror = (function() {
       if (pos.line == change.to.line) ch += end.ch - change.to.ch;
       return Pos(line, ch);
     };
-    return {anchor: adjustPos(sel.anchor), head: adjustPos(sel.head)};
+    return {anchor: adjustPos(doc.sel.anchor), head: adjustPos(doc.sel.head)};
   }
 
   function filterChange(doc, change) {
@@ -2064,7 +2086,7 @@ window.CodeMirror = (function() {
       origin: change.origin,
       update: function(from, to, text, origin) {
         if (from) this.from = clipPos(doc, from);
-        if (to) this.to = clipPos(doc.to);
+        if (to) this.to = clipPos(doc, to);
         if (text) this.text = text;
         if (origin !== undefined) this.origin = origin;
       },
@@ -2104,7 +2126,7 @@ window.CodeMirror = (function() {
   }
 
   function makeChangeNoReadonly(doc, change, selUpdate) {
-    var selAfter = computeSelAfterChange(doc.sel, change, selUpdate);
+    var selAfter = computeSelAfterChange(doc, change, selUpdate);
     addToHistory(doc, change, selAfter, doc.cm ? doc.cm.curOp.id : NaN);
 
     makeChangeSingleDoc(doc, change, selAfter, stretchSpansOverChange(doc, change));
@@ -2134,7 +2156,7 @@ window.CodeMirror = (function() {
       change.origin = type;
       anti.changes.push(historyChangeFromChange(doc, change));
 
-      var after = i ? computeSelAfterChange(doc.sel, change, null)
+      var after = i ? computeSelAfterChange(doc, change, null)
                     : {anchor: event.anchorBefore, head: event.headBefore};
       makeChangeSingleDoc(doc, change, after, mergeOldSpans(doc, change));
       var rebased = [];
@@ -2180,7 +2202,7 @@ window.CodeMirror = (function() {
                 text: [change.text[0]], origin: change.origin};
     }
 
-    if (!selAfter) selAfter = computeSelAfterChange(doc.sel, change, null);
+    if (!selAfter) selAfter = computeSelAfterChange(doc, change, null);
     if (doc.cm) makeChangeSingleDocInEditor(doc.cm, change, spans, selAfter);
     else updateDoc(doc, change, spans, selAfter);
   }
@@ -2256,7 +2278,10 @@ window.CodeMirror = (function() {
     if (pos.line < doc.first) return Pos(doc.first, 0);
     var last = doc.first + doc.size - 1;
     if (pos.line > last) return Pos(last, getLine(doc, last).text.length);
-    var ch = pos.ch, linelen = getLine(doc, pos.line).text.length;
+    return clipToLen(pos, getLine(doc, pos.line).text.length);
+  }
+  function clipToLen(pos, linelen) {
+    var ch = pos.ch;
     if (ch == null || ch > linelen) return Pos(pos.line, linelen);
     else if (ch < 0) return Pos(pos.line, 0);
     else return pos;
@@ -3197,16 +3222,16 @@ window.CodeMirror = (function() {
     }
   }
   function isModifierKey(event) {
-    var name = keyNames[e_prop(event, "keyCode")];
+    var name = keyNames[event.keyCode];
     return name == "Ctrl" || name == "Alt" || name == "Shift" || name == "Mod";
   }
   function keyName(event, noShift) {
-    var name = keyNames[e_prop(event, "keyCode")];
+    var name = keyNames[event.keyCode];
     if (name == null || event.altGraphKey) return false;
-    if (e_prop(event, "altKey")) name = "Alt-" + name;
-    if (e_prop(event, flipCtrlCmd ? "metaKey" : "ctrlKey")) name = "Ctrl-" + name;
-    if (e_prop(event, flipCtrlCmd ? "ctrlKey" : "metaKey")) name = "Cmd-" + name;
-    if (!noShift && e_prop(event, "shiftKey")) name = "Shift-" + name;
+    if (event.altKey) name = "Alt-" + name;
+    if (flipCtrlCmd ? event.metaKey : event.ctrlKey) name = "Ctrl-" + name;
+    if (flipCtrlCmd ? event.ctrlKey : event.metaKey) name = "Cmd-" + name;
+    if (!noShift && event.shiftKey) name = "Shift-" + name;
     return name;
   }
   CodeMirror.lookupKey = lookupKey;
@@ -4261,7 +4286,7 @@ window.CodeMirror = (function() {
 
   Doc.prototype = createObj(BranchChunk.prototype, {
     iter: function(from, to, op) {
-      if (op) this.iterN(from - this.first, to - (from - this.first), op);
+      if (op) this.iterN(from - this.first, to - from, op);
       else this.iterN(this.first, this.first + this.size, from);
     },
 
@@ -4775,13 +4800,6 @@ window.CodeMirror = (function() {
     }
     if (mac && e.ctrlKey && b == 1) b = 3;
     return b;
-  }
-
-  // Allow 3rd-party code to override event properties by adding an override
-  // object to an event object.
-  function e_prop(e, prop) {
-    var overridden = e.override && e.override.hasOwnProperty(prop);
-    return overridden ? e.override[prop] : e[prop];
   }
 
   // EVENT HANDLING

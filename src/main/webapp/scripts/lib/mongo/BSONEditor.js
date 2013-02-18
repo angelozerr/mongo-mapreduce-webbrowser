@@ -117,13 +117,23 @@ BSONEditor.prototype.getBSON = function() {
 };
 
 BSONEditor.prototype.onAfterUI = function() {
+	
+	function myJsonValidator(text) {
+		if (text == '') {
+			return [];
+		}
+		return CodeMirror.jsonValidator(text);
+	}
+	;
+	
 	this.codeMirror = CodeMirror.fromTextArea(this.bsonTextarea, {
 		mode : 'application/json',
 		lineNumbers : true,
 		lineWrapping : true,
 		matchBrackets: true,
 		autoCloseBrackets: true,
-		gutters: ["CodeMirror-linenumbers", "CodeMirror-lints"]
+		gutters: ["CodeMirror-linenumbers", "CodeMirror-lint-markers"],
+		lintWith: myJsonValidator
 	});
 	var editor = this.codeMirror;
 	var hlLine = editor.addLineClass(0, "background", "activeline");
@@ -136,17 +146,10 @@ BSONEditor.prototype.onAfterUI = function() {
 	});
 	
 	var _this= this;
-	var validate = function() {
-		if (_this.editable) {
-			CodeMirror.validate(editor, CodeMirror.jsonValidator);
-		}
-	};
-	
 	var onEditorChanged = function() {
 		if (_this.changeListener) {
 			_this.changeListener();
 		}
-		validate();
 	};
 	
 	var waiting;
@@ -154,6 +157,5 @@ BSONEditor.prototype.onAfterUI = function() {
 	  clearTimeout(waiting);
 	  waiting = setTimeout(onEditorChanged, 500);
 	});
-
-	setTimeout(validate, 100);
+	
 };

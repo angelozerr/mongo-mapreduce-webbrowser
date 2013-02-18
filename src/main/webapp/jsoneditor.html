@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <title>CodeMirror: JSON Editor Demo</title>
     
-	<link rel="stylesheet" type="text/css" href="css/codemirror.css" />
-	<link rel="stylesheet" type="text/css" href="css/codemirror-lint.css" />
+	<link rel="stylesheet" type="text/css" href="css/codemirror/codemirror.css" />
+	<link rel="stylesheet" type="text/css" href="css/codemirror/lint.css" />
 	
 	<script src="scripts/lib/jsonlint/jsonlint.js"></script>
 	<script src="scripts/lib/jsonlint/formatter.js"></script>
@@ -66,7 +66,8 @@ window.onload = function() {
     mode: "application/json",
     matchBrackets: true,
     autoCloseBrackets: true,
-    gutters: ["CodeMirror-linenumbers", "CodeMirror-lints"]
+    gutters: ["CodeMirror-linenumbers", "CodeMirror-lint-markers"],
+    lintWith: CodeMirror.jsonValidator
   });
   window.editor = editor;
   
@@ -79,19 +80,7 @@ window.onload = function() {
 	  hlLine = editor.addLineClass(cur, "background", "activeline");
 	}
   });
-  
-  // Manage syntax error with JSONLint.
-  var validate = function() {
-  	CodeMirror.validate(editor, CodeMirror.jsonValidator);  	
-  };
-  var waiting;
-  editor.on("change", function() {
-	clearTimeout(waiting);
-	waiting = setTimeout(validate, 500);
-  });
-
-  setTimeout(validate, 100);
-  
+    
 };
 
 </script>

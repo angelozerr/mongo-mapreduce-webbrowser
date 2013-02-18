@@ -57,13 +57,36 @@ ScriptEditor.prototype.addChangeListener = function(changeListener) {
 };
 
 ScriptEditor.prototype.onAfterUI = function() {
+
+	function myJavascriptValidator(text) {
+		if (text == '') {
+			return [];
+		}
+		return CodeMirror.javascriptValidator('var f=' + text + ';');
+	}
+	;
+
+	function myFormatAnnotation(ann) {
+		if (ann.from.line == 0) {
+			var length = 'var f='.length;
+			ann.from.ch = ann.from.ch - length;
+			ann.to.ch = ann.to.ch - length;
+		}
+		return ann;
+	}
+	;
+
 	this.codeMirror = CodeMirror.fromTextArea(this.scriptTextarea, {
-		mode : 'application/javascript',
+		mode : 'javascript',
 		lineNumbers : true,
 		lineWrapping : true,
-		matchBrackets: true,
-		autoCloseBrackets: true,
-		gutters: ["CodeMirror-linenumbers", "CodeMirror-lints"]
+		matchBrackets : true,
+		autoCloseBrackets : true,
+		gutters : [ "CodeMirror-linenumbers", "CodeMirror-lint-markers" ],
+		lintWith : {
+			"getAnnotations" : myJavascriptValidator,
+			"formatAnnotation" : myFormatAnnotation
+		}
 	});
 	var editor = this.codeMirror;
 	var hlLine = editor.addLineClass(0, "background", "activeline");
@@ -78,25 +101,27 @@ ScriptEditor.prototype.onAfterUI = function() {
 	var changeListener = this.changeListener;
 	var widgets = []
 	var validate = function() {
-		CodeMirror.validate(editor, CodeMirror.javascriptValidator, {
-			getContents : function () {
-				return 'var f=' + editor.getValue() + ';';
-			},
-			formatAnnotation : function(annotation) {
-				if (annotation.lineStart == 0) {
-					annotation.charStart = annotation.charStart - ('var f='.length);
-					annotation.charEnd = annotation.charEnd - ('var f='.length);
-				}
-				return annotation;
-			}
-		});
+		CodeMirror.validate(editor, CodeMirror.javascriptValidator,
+				{
+					getContents : function() {
+						return 'var f=' + editor.getValue() + ';';
+					},
+					formatAnnotation : function(annotation) {
+						if (annotation.lineStart == 0) {
+							annotation.charStart = annotation.charStart
+									- ('var f='.length);
+							annotation.charEnd = annotation.charEnd
+									- ('var f='.length);
+						}
+						return annotation;
+					}
+				});
 	};
 
 	var onEditorChanged = function() {
 		if (changeListener) {
 			changeListener();
 		}
-		validate();
 	};
 
 	var waiting;
@@ -105,5 +130,4 @@ ScriptEditor.prototype.onAfterUI = function() {
 		waiting = setTimeout(onEditorChanged, 500);
 	});
 
-	setTimeout(validate, 100);
 };
