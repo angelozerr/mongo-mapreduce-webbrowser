@@ -132,7 +132,9 @@ $(function() {
 
 		onCreate : function(node, span) {
 			bindContextMenu(span);
-		}
+		},
+		
+		debugLevel : 0
 	});
 	MultiPageEditor.tree = tree;
 	
