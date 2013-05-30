@@ -67,7 +67,7 @@ BSONEditorPage.prototype.createUI = function(parent) {
 	fileName= fileName.replace(/\//g, '%2F');
 	jQuery.ajax({
 		type : 'GET', 
-		url : 'jaxrs/resources/load/' + fileName, 
+		url : SERVICE_LOAD_BASE_URL + fileName, 
 		success : function(data, textStatus, jqXHR) {
 			_this.editor.setValue(data);
 		},

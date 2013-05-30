@@ -224,7 +224,7 @@ MapReduceEditorPage.prototype.save = function() {
 	var _this = this;
 	jQuery.ajax({
 		type : 'GET',
-		url : 'jaxrs/resources/save',
+		url : SERVICE_SAVE_BASE_URL,
 		data : {
 			fileName : fileName,
 			content : jsContent
@@ -251,7 +251,7 @@ MapReduceEditorPage.prototype.loadScript = function() {
 	
 	fileName= fileName.replace(/\//g, '%2F');
 	
-	script.src = 'jaxrs/resources/load/' + fileName;
+	script.src = SERVICE_LOAD_BASE_URL + fileName;
 	// + '?i=' + index;
 
 	headID.appendChild(script);

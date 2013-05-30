@@ -1,3 +1,7 @@
+var SERVICE_LIST_BASE_URL = 'services/resources/list/'; 
+var SERVICE_LOAD_BASE_URL = 'services/resources/load/';
+var SERVICE_SAVE_BASE_URL = 'services/resources/save/';
+
 $(function() {
 
 	/* Resizable navigator */
@@ -97,7 +101,7 @@ $(function() {
 		autoFocus : false, // Set focus to first child, when expanding or
 		// lazy-loading.
 		initAjax : {
-			url : "jaxrs/resources/list/"
+			url : SERVICE_LIST_BASE_URL
 		},
 
 		onActivate : function(node) {
@@ -115,14 +119,6 @@ $(function() {
 				$(".contextMenu").hide();
 				// return false;
 			}
-		},
-
-		onLazyRead : function(node) {
-			node.appendAjax({
-				url : "jaxrs/resources/mapreduces/",
-				// We don't want the next line in production code:
-				debugLazyDelay : 750
-			});
 		},
 
 		onDblClick : function(node, event) {

@@ -5,6 +5,7 @@
 		<title>Mongo MapReduce WebBrowser</title>
 		<!--<base href="/" />-->
 			
+		<!-- CodeMirror -->
 		<link rel="stylesheet" type="text/css" href="scripts/lib/codemirror/lib/codemirror.css" />
 		<link rel="stylesheet" type="text/css" href="scripts/lib/codemirror/addon/lint/lint.css" />
 		<link rel="stylesheet" type="text/css" href="css/main.css" />
@@ -27,6 +28,7 @@
 				
 		<script src="scripts/lib/jshint/jshint-r12-80277ef.js"></script>
 		
+		<!-- CodeMirror -->
 		<script src="scripts/lib/codemirror/lib/codemirror.js"></script>
 		<script src="scripts/lib/codemirror/mode/javascript/javascript.js"></script>
 		<script src="scripts/lib/codemirror/addon/lint/lint.js"></script>
@@ -35,6 +37,29 @@
 		<script src="scripts/lib/codemirror/addon/edit/matchbrackets.js"></script>
 		<script src="scripts/lib/codemirror/addon/edit/closebrackets.js"></script>
 		<script src="scripts/lib/codemirror/addon/selection/active-line.js"></script>
+		
+		<!-- Tern JS -->
+	  <script src="scripts/lib/ternjs/acorn/acorn.js"></script>
+	  <script src="scripts/lib/ternjs/acorn/acorn_loose.js"></script>
+	  <script src="scripts/lib/ternjs/acorn/util/walk.js"></script>
+	  <script src="scripts/lib/ternjs/tern/lib/signal.js"></script>
+	  <script src="scripts/lib/ternjs/tern/lib/tern.js"></script>
+	  <script src="scripts/lib/ternjs/tern/lib/def.js"></script>
+	  <script src="scripts/lib/ternjs/tern/lib/comment.js"></script>
+	  <script src="scripts/lib/ternjs/tern/lib/infer.js"></script>
+	
+		<script src="scripts/lib/codemirror/addon/hint/show-hint.js"></script>
+	
+	  <script src="scripts/lib/codemirror-xquery/addon/hint/tern/tern-hint.js"></script>    
+	  <script src="scripts/lib/codemirror-xquery/addon/hint/tern/defs/ecma5.json.js"></script>
+	  
+	  <link rel="stylesheet" href="scripts/lib/codemirror-xquery/addon/hint/templates-hint.css">
+	  <script src="scripts/lib/codemirror-xquery/addon/hint/templates-hint.js"></script>
+	  <script src="scripts/lib/codemirror-xquery/addon/hint/javascript/javascript-templates.js"></script>
+	  		
+	  <link rel="stylesheet" href="scripts/lib/codemirror-xquery/addon/hint/show-hint-eclipse.css">
+	  <script src="scripts/lib/codemirror-xquery/addon/hint/show-context-info.js"></script>
+	  <link rel="stylesheet" href="scripts/lib/codemirror-xquery/addon/hint/show-context-info.css">
 		
 		<script src="scripts/lib/mongo/extension.js"></script>			
 		<script src="scripts/lib/mongo/ObjectId.js"></script>
