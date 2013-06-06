@@ -4,7 +4,7 @@ ${namespace}.mapFunc=function () {
     if (!this.tags) {
         return;
     }
-
+var a = "";
     for (index in this.tags) {
         emit(this.tags[index], 1);
     }

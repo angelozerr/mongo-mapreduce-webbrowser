@@ -78,7 +78,26 @@
   }
 
   function buildRequest(cm, query, allowFragments) {
-    var files = [], offsetLines = 0;
+    // files
+    var files = [];
+    files.push({
+      type : "full",
+      name : "xxx",
+      text : cm.getValue()
+    });
+    // query
+    query.lineCharPositions = true;
+    if (query.end == null) {
+      query.end = cm.getCursor("end");
+      if (cm.somethingSelected())
+        query.start = cm.getCursor("start");
+    }
+    query.file = "#0";
+    return {
+      query : query,
+      files : files
+    }
+    /*var files = [], offsetLines = 0;
     if (typeof query == "string")
       query = {
         type : query
@@ -90,7 +109,7 @@
         query.start = cm.getCursor("start");
     }
     var startPos = query.start || query.end;
-    curDoc.changed=true;
+    //curDoc.changed=true; 
     if (curDoc.changed) {
       if (cm.lineCount() > bigDoc && allowFragments !== false
           && curDoc.changed.to - curDoc.changed.from < 100
@@ -129,7 +148,7 @@
     return {
       query : query,
       files : files
-    };
+    };*/
   }
 
   function displayError(err) {
@@ -248,7 +267,7 @@
 
     if (val) {
       getServer();
-      registerDoc("xxx" + i++, cm.getDoc());
+      //registerDoc("xxx" + i++, cm.getDoc());
     }
   });
 
