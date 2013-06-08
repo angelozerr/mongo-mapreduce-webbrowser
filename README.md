@@ -1,4 +1,4 @@
-# Mongo MapReduce WebBrowser
+# What is Mongo MapReduce WebBrowser?
 
 **Mongo MapReduce WebBrowser** gives you the capability to write, test (quickly) and debug with breakpoints 
 your MapReduce with your Web Browser.
