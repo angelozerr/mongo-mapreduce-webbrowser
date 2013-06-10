@@ -1,0 +1,1 @@
+java Runner -port 9080 -contextpath mongo-mapreduce-webbrowser -data temp
