@@ -112,7 +112,11 @@ BSONEditor.prototype.format = function() {
 
 BSONEditor.prototype.getBSON = function() {
   var jsonData = this.getValue();
-  return BSON.parseStrict(jsonData)
+  var array = BSON.parseStrict(jsonData);
+  if (array.length) {
+    this.bsonObject = array[0];
+  }
+  return array;
 };
 
 BSONEditor.prototype.onAfterUI = function() {
@@ -145,8 +149,16 @@ BSONEditor.prototype.onAfterUI = function() {
 
   var waiting;
   editor.on("change", function() {
+    this.bsonObject = null;
     clearTimeout(waiting);
     waiting = setTimeout(onEditorChanged, 500);
   });
 
+};
+
+BSONEditor.prototype.getFirstBSONObject = function() {
+  if (this.bsonObject == null) {
+    this.getBSON();
+  }
+  return this.bsonObject;
 };

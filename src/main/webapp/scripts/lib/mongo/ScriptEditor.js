@@ -1,3 +1,9 @@
+var EDITOR_TYPE = {
+  "Map" : 0,
+  "Reduce" : 1,
+  "Finalize" : 2
+};
+
 /**
  * Creates a new ScriptEditor.
  * 
@@ -5,8 +11,10 @@
  *          HTML element parent where the editor should be added.
  * @constructor
  */
-function ScriptEditor(parent) {
+function ScriptEditor(parent, executor, type) {
   this.scriptTextarea = this._createUI(parent);
+  this.executor = executor;
+  this.type = type;
 };
 
 /**
@@ -58,13 +66,14 @@ ScriptEditor.prototype.addChangeListener = function(changeListener) {
 
 ScriptEditor.prototype.onAfterUI = function() {
 
+  // Validation
+
   function myJavascriptValidator(text) {
     if (text == '') {
       return [];
     }
     return CodeMirror.javascriptValidator('var f=' + text + ';');
   }
-  ;
 
   function myFormatAnnotation(ann) {
     if (ann.from.line == 0) {
@@ -73,6 +82,62 @@ ScriptEditor.prototype.onAfterUI = function() {
       ann.to.ch = ann.to.ch - length;
     }
     return ann;
+  }
+
+  // Completion
+
+  function toJSONMeta(jsonObj) {
+    var meta = '{';
+    var i = 0;
+    for (k in jsonObj) {
+      if (i > 0)
+        meta += ',';
+      meta += '"';
+      meta += k;
+      meta += '":';
+      var v = jsonObj[k];
+      switch (typeof v) {
+      case "string":
+        meta += '""';
+        break;
+      case "number":
+        meta += '0';
+        break;
+      case "boolean":
+        meta += 'true';
+        break;
+      case "object":
+        if (v instanceof Date) {
+          meta += 'new Date()';
+        } else if (v instanceof ObjectId) {
+          meta += 'new ObjectId()';
+        } else if (Object.prototype.toString.apply(v) === '[object Array]') {
+          meta += '[';
+          var length = v.length;
+          for (j = 0; j < length; j++) {
+            meta += toJSONMeta(v[j]);
+          }
+          meta += ']';
+        }
+        break;
+      default:
+        meta += 'null';
+      }
+      i++;
+    }
+    meta += '}';
+    return meta;
+  }
+
+  var _this = this;
+
+  function getText(cm) {
+    if (_this.type == EDITOR_TYPE.Map) {
+      var jsonObj = _this.executor.bsonEditor.getFirstBSONObject();
+      json = toJSONMeta(jsonObj);
+      return "var f=" + cm.getValue() + "f.apply(" + json + ")";
+    }
+    return cm.getValue();
   }
 
   function passAndHint(cm) {
@@ -107,7 +172,9 @@ ScriptEditor.prototype.onAfterUI = function() {
       "'.'" : passAndHint,
       "Ctrl-Space" : "autocomplete"
     },
-    ternWith : true
+    ternWith : {
+      "getText" : getText
+    }
   });
   var editor = this.codeMirror;
 
