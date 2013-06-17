@@ -1,4 +1,6 @@
+import java.awt.Desktop;
 import java.io.File;
+import java.net.URI;
 import java.net.URL;
 import java.security.ProtectionDomain;
 
@@ -22,8 +24,11 @@ public class Runner {
 		webapp.setWar(location.toExternalForm());
 		server.setHandler(webapp);
 		server.start();
+		
+		Desktop.getDesktop().browse(new URI("http://localhost:"+port+contextpath));
+		
 		server.join();
-
+		
 	}
 
 	private static String getContextpath(String[] args) {
@@ -64,4 +69,5 @@ public class Runner {
 		return port;
 	}
 
+	
 }
