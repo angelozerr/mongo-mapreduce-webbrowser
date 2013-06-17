@@ -18,7 +18,7 @@
 					</descriptors>
 					<archive>
 						<manifest>
-							<mainClass>Runner</mainClass>
+							<mainClass>bin.StartServer</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

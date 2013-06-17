@@ -1,3 +1,4 @@
+package bin;
 import java.awt.Desktop;
 import java.io.File;
 import java.net.URI;
@@ -7,7 +8,7 @@ import java.security.ProtectionDomain;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 
-public class Runner {
+public class StartServer {
 
 	private static final int DUMMY_PORT = 12345;
 	private static final String ROOT_CONTEXT_PATH = "/";
@@ -16,7 +17,7 @@ public class Runner {
 		int port =getPort(args);
 		String contextpath=getContextpath(args);
 		Server server = new Server(port);
-		ProtectionDomain domain = Runner.class.getProtectionDomain();
+		ProtectionDomain domain = StartServer.class.getProtectionDomain();
 		URL location = domain.getCodeSource().getLocation();
 		WebAppContext webapp = new WebAppContext();
 		webapp.setContextPath(contextpath);
