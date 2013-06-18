@@ -5,6 +5,7 @@
 	<id>runner</id>
 	<formats>
 		<format>war</format>
+		<format>zip</format>
 	</formats>
 	<baseDirectory>/</baseDirectory>
 	
