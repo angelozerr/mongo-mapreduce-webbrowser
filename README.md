@@ -20,3 +20,11 @@ Use the debugger tools of your preffered WebBrowser to set breakpoint in your Ma
 Here a screen with Chrome Dev Tools : 
 
 ![MapReduce Debug](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/images/Count_Tags_Debug.png)
+
+# Installation
+
+See (Installation Guide)[https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/Installation-Guide]
+
+# Build
+
+See cloudbees job: (https://opensagres.ci.cloudbees.com/job/mongo-mapreduce-webbrowser/)[https://opensagres.ci.cloudbees.com/job/mongo-mapreduce-webbrowser/]
