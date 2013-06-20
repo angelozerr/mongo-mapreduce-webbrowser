@@ -24,12 +24,15 @@
 	<dependencySets>
 		<dependencySet>
 			<unpack>true</unpack>
-			<outputDirectory>/</outputDirectory>
+			<outputDirectory>webapp</outputDirectory>
 			<includes>
 				<include>*:war</include>
 			</includes>
 		</dependencySet>
 		<dependencySet>
+			<excludes>
+			<exclude>fr.opensagres:*:*</exclude>
+			</excludes>
 			<scope>provided</scope>
 			<outputDirectory>/</outputDirectory>
 			<unpack>true</unpack>
