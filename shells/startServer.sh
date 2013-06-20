@@ -1,1 +1,1 @@
-java bin.StartServer -port 9080 -contextpath mongo-mapreduce-webbrowser -data temp
+java bin.StartServer -port 9080
