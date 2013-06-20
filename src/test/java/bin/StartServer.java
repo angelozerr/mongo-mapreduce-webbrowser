@@ -19,6 +19,8 @@ import java.security.ProtectionDomain;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 
+import fr.opensagres.mapreduce.webbrowser.Configuration;
+
 /**
  * Starts an HTTP Jetty server and deploys the Mongo MapReduce WebBrowser
  * webapp.
@@ -29,14 +31,8 @@ public class StartServer {
 
 	private static final int DUMMY_PORT = 12345;
 	private static final String ROOT_CONTEXT_PATH = "/";
-	private static final String DATA_DIR = "data";
 
 	public static void main(String[] args) throws Exception {
-		String dataDir = getDataDir(args);
-		if (isNotEmpty(dataDir)) {
-			System.setProperty("mongo.mapreduce.webbrowser.resources.dir",
-					dataDir);
-		}
 
 		int port = getPort(args);
 		String contextpath = getContextpath(args);
@@ -50,7 +46,11 @@ public class StartServer {
 		URL location = domain.getCodeSource().getLocation();
 		WebAppContext webapp = new WebAppContext();
 		webapp.setContextPath(contextpath);
-		webapp.setWar(location.toExternalForm()+"/webapp");
+		webapp.setWar(location.toExternalForm() + "/webapp");
+		String dataDir = getDataDir(args);
+		if (isNotEmpty(dataDir)) {
+			webapp.setInitParameter(Configuration.DATA_DIR_KEY, dataDir);
+		}
 		server.setHandler(webapp);
 		server.start();
 

@@ -33,6 +33,9 @@
 		<url-pattern>/services/*</url-pattern>
 	</servlet-mapping>
 
+    <listener>
+    	<listener-class>fr.opensagres.mapreduce.webbrowser.servlet.InitializerContextListener</listener-class>
+    </listener>
 <!--
 	<listener>
 		<listener-class>com.mongodb.jee.servlet.MongoServletContextListener

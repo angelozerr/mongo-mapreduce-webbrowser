@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
@@ -29,14 +28,13 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.io.IOUtils;
 
-import fr.opensagres.mapreduce.webbrowser.Helper;
+import fr.opensagres.mapreduce.webbrowser.Configuration;
 
 @Path("/resources")
 public class ResourcesService {
@@ -55,10 +53,9 @@ public class ResourcesService {
 	 */
 	@GET
 	@Path("/save")
-	public String save(@Context ServletContext context,
-			@QueryParam("fileName") String fileName,
+	public String save(@QueryParam("fileName") String fileName,
 			@QueryParam("content") String content) throws IOException {
-		String dataDir = Helper.getDataDir(context);
+		File dataDir = Configuration.getDataDir();
 		File file = new File(dataDir, "../" + fileName);
 		file.getParentFile().mkdirs();
 		OutputStream out = null;
@@ -84,8 +81,8 @@ public class ResourcesService {
 	 */
 	@GET
 	@Path("/load/{fileName}")
-	public Response load(@Context ServletContext context,
-			@PathParam("fileName") final String fileName) throws IOException {
+	public Response load(@PathParam("fileName") final String fileName)
+			throws IOException {
 		CacheControl cacheControl = new CacheControl();
 		cacheControl.setNoCache(true);
 
@@ -93,7 +90,7 @@ public class ResourcesService {
 		MediaType mediaType = jsFile ? APPLICATION_JAVASCRIPT
 				: MediaType.TEXT_PLAIN_TYPE;
 
-		String dataDir = Helper.getDataDir(context);
+		File dataDir = Configuration.getDataDir();
 		final File file = new File(dataDir, "../" + fileName);
 		if (!file.exists()) {
 			throw new NotFoundException(new FileNotFoundException(
@@ -196,16 +193,14 @@ public class ResourcesService {
 	 */
 	@GET
 	@Path("/list")
-	public Response getResources(@Context ServletContext context)
-			throws IOException {
-		String dataDir = Helper.getDataDir(context);
-		final File file = new File(dataDir);
+	public Response getResources() throws IOException {
+		final File dataDir = Configuration.getDataDir();
 		return Response.ok(new StreamingOutput() {
 
 			public void write(OutputStream out) throws IOException,
 					WebApplicationException {
 				IOUtils.write("[", out);
-				toJSON(file, out);
+				toJSON(dataDir, out);
 				IOUtils.write("]", out);
 				IOUtils.closeQuietly(out);
 			}

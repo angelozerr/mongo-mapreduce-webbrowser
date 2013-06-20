@@ -9,26 +9,20 @@
  *     Angelo Zerr <angelo.zerr@gmail.com> - initial API and implementation
  *     Pascal Leclercq <pascal.leclercq@gmail.com> - initial API and implementation     
  *******************************************************************************/
-package fr.opensagres.mapreduce.webbrowser;
+package fr.opensagres.mapreduce.webbrowser.utils;
 
-import javax.servlet.ServletContext;
+/**
+ * String utilities.
+ * 
+ */
+public class StringUtils {
 
-public class Helper {
-
-
-	public static String getDataDir(ServletContext context) {
-		String dataDir = System
-				.getProperty("mongo.mapreduce.webbrowser.resources.dir");
-		if (isNotEmpty(dataDir)) {
-			return dataDir;
-		}		
-		if (context == null) {
-			return null;
-		}
-		return context.getRealPath("resources");
+	public static boolean isEmpty(CharSequence cs) {
+		return cs == null || cs.length() == 0;
 	}
 
-	public static boolean isNotEmpty(String s) {
-		return s != null && s.length() > 0;
+	public static boolean isNotEmpty(CharSequence cs) {
+		return !StringUtils.isEmpty(cs);
 	}
+
 }
