@@ -12,7 +12,6 @@
 package bin;
 
 import java.awt.Desktop;
-import java.io.File;
 import java.net.URI;
 import java.net.URL;
 import java.security.ProtectionDomain;
@@ -33,6 +32,12 @@ public class StartServer {
 	private static final String DATA_DIR = "data";
 
 	public static void main(String[] args) throws Exception {
+		String dataDir = getDataDir(args);
+		if (isNotEmpty(dataDir)) {
+			System.setProperty("mongo.mapreduce.webbrowser.resources.dir",
+					dataDir);
+		}
+
 		int port = getPort(args);
 		String contextpath = getContextpath(args);
 
@@ -45,7 +50,6 @@ public class StartServer {
 		URL location = domain.getCodeSource().getLocation();
 		WebAppContext webapp = new WebAppContext();
 		webapp.setContextPath(contextpath);
-		webapp.setTempDirectory(new File(getData(args)));
 		webapp.setWar(location.toExternalForm());
 		server.setHandler(webapp);
 		server.start();
@@ -68,42 +72,39 @@ public class StartServer {
 	}
 
 	public static String getContextpath(String[] args) {
-		String contextpath = ROOT_CONTEXT_PATH;
 		for (int i = 0; i < args.length; i++) {
 			if ("-contextpath".equals(args[i])) {
-				contextpath = ROOT_CONTEXT_PATH + args[i + 1];
-				break;
+				return ROOT_CONTEXT_PATH + args[i + 1];
 			}
 		}
 
-		return contextpath;
+		return ROOT_CONTEXT_PATH;
 	}
 
-	public static String getData(String[] args) {
-		String contextpath = DATA_DIR;
+	public static String getDataDir(String[] args) {
 		for (int i = 0; i < args.length; i++) {
-			if ("-data".equals(args[i])) {
-				contextpath = args[i + 1];
-				break;
+			if ("-dataDir".equals(args[i])) {
+				return args[i + 1];
 			}
 		}
-
-		return contextpath;
+		return null;
 	}
 
 	public static int getPort(String[] args) {
-		int port = DUMMY_PORT;
 		for (int i = 0; i < args.length; i++) {
 			if ("-port".equals(args[i])) {
 				try {
-					port = Integer.parseInt(args[i + 1]);
+					return Integer.parseInt(args[i + 1]);
 				} catch (NumberFormatException e) {
 					System.err.println(args[i + 1] + " is not an integer");
 				}
 				break;
 			}
 		}
-		return port;
+		return DUMMY_PORT;
 	}
 
+	public static boolean isNotEmpty(String s) {
+		return s != null && s.length() > 0;
+	}
 }
