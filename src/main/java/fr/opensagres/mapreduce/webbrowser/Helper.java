@@ -10,20 +10,25 @@
  *     Pascal Leclercq <pascal.leclercq@gmail.com> - initial API and implementation     
  *******************************************************************************/
 package fr.opensagres.mapreduce.webbrowser;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.webapp.WebAppContext;
+
+import javax.servlet.ServletContext;
+
+public class Helper {
 
 
-public class M2eServer {
+	public static String getDataDir(ServletContext context) {
+		String dataDir = System
+				.getProperty("mongo.mapreduce.webbrowser.resources.dir");
+		if (isNotEmpty(dataDir)) {
+			return dataDir;
+		}		
+		if (context == null) {
+			return null;
+		}
+		return context.getRealPath("resources");
+	}
 
-	public static void main( String[] args )
-	        throws Exception
-	    {
-	        Server server = new Server( 12345 );
-	        WebAppContext webAppContext = new WebAppContext( "src/main/webapp", "/" );
-	        server.setHandler(webAppContext);
-	        server.start();
-	        server.join();
-
-	    }
+	public static boolean isNotEmpty(String s) {
+		return s != null && s.length() > 0;
+	}
 }

@@ -1,4 +1,15 @@
-package fr.opensagres.mapreduce.services;
+/*******************************************************************************
+ * Copyright (c) 2013 Angelo ZERR and Pascal Leclercq.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:      
+ *     Angelo Zerr <angelo.zerr@gmail.com> - initial API and implementation
+ *     Pascal Leclercq <pascal.leclercq@gmail.com> - initial API and implementation     
+ *******************************************************************************/
+package fr.opensagres.mapreduce.webbrowser.services;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -25,19 +36,30 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.io.IOUtils;
 
+import fr.opensagres.mapreduce.webbrowser.Helper;
+
 @Path("/resources")
 public class ResourcesService {
 
 	private static final MediaType APPLICATION_JAVASCRIPT = new MediaType(
 			"application", "javascript");
 
+	/**
+	 * Save resource.
+	 * 
+	 * @param context
+	 * @param fileName
+	 * @param content
+	 * @return
+	 * @throws IOException
+	 */
 	@GET
 	@Path("/save")
 	public String save(@Context ServletContext context,
 			@QueryParam("fileName") String fileName,
 			@QueryParam("content") String content) throws IOException {
-		String filePath = context.getRealPath(fileName);
-		File file = new File(filePath);
+		String dataDir = Helper.getDataDir(context);
+		File file = new File(dataDir, "../" + fileName);
 		file.getParentFile().mkdirs();
 		OutputStream out = null;
 		try {
@@ -51,6 +73,15 @@ public class ResourcesService {
 		return "";
 	}
 
+	/**
+	 * Load resource.
+	 * 
+	 * @param context
+	 * @param fileName
+	 * @param content
+	 * @return
+	 * @throws IOException
+	 */
 	@GET
 	@Path("/load/{fileName}")
 	public Response load(@Context ServletContext context,
@@ -62,10 +93,11 @@ public class ResourcesService {
 		MediaType mediaType = jsFile ? APPLICATION_JAVASCRIPT
 				: MediaType.TEXT_PLAIN_TYPE;
 
-		String filePath = context.getRealPath(fileName);
-		final File file = new File(filePath);
+		String dataDir = Helper.getDataDir(context);
+		final File file = new File(dataDir, "../" + fileName);
 		if (!file.exists()) {
-			throw new NotFoundException(new FileNotFoundException(filePath));
+			throw new NotFoundException(new FileNotFoundException(
+					file.getPath()));
 		}
 		return Response.ok(new StreamingOutput() {
 
@@ -76,7 +108,8 @@ public class ResourcesService {
 				} else {
 					String namespace = fileName;
 					namespace = namespace.replaceAll("/", "_")
-							.replaceAll("\\\\", "_").replaceAll("[.]", "_");
+							.replaceAll(" ", "_").replaceAll("\\\\", "_")
+							.replaceAll("[.]", "_");
 
 					// Variable : var
 					// mapreduces_default_mapreduce_mr_merge_js={};
@@ -152,12 +185,21 @@ public class ResourcesService {
 		}, mediaType).cacheControl(cacheControl).build();
 	}
 
+	/**
+	 * Returns list of resources.
+	 * 
+	 * @param context
+	 * @param fileName
+	 * @param content
+	 * @return
+	 * @throws IOException
+	 */
 	@GET
 	@Path("/list")
 	public Response getResources(@Context ServletContext context)
 			throws IOException {
-		String filePath = context.getRealPath("resources");
-		final File file = new File(filePath);
+		String dataDir = Helper.getDataDir(context);
+		final File file = new File(dataDir);
 		return Response.ok(new StreamingOutput() {
 
 			public void write(OutputStream out) throws IOException,
