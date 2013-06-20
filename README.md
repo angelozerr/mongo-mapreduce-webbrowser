@@ -23,8 +23,8 @@ Here a screen with Chrome Dev Tools :
 
 # Installation
 
-See (Installation Guide)[https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/Installation-Guide]
+See [Installation Guide](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/Installation-Guide)
 
 # Build
 
-See cloudbees job: (https://opensagres.ci.cloudbees.com/job/mongo-mapreduce-webbrowser/)[https://opensagres.ci.cloudbees.com/job/mongo-mapreduce-webbrowser/]
+See cloudbees job: [https://opensagres.ci.cloudbees.com/job/mongo-mapreduce-webbrowser/](https://opensagres.ci.cloudbees.com/job/mongo-mapreduce-webbrowser/)
