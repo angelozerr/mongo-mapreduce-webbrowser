@@ -25,6 +25,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
@@ -183,60 +184,17 @@ public class ResourcesService {
 	}
 
 	/**
-	 * Returns list of resources.
+	 * Returns list of resources as JSON array.
 	 * 
-	 * @param context
-	 * @param fileName
-	 * @param content
 	 * @return
 	 * @throws IOException
 	 */
 	@GET
 	@Path("/list")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response getResources() throws IOException {
-		final File dataDir = Configuration.getDataDir();
-		return Response.ok(new StreamingOutput() {
-
-			public void write(OutputStream out) throws IOException,
-					WebApplicationException {
-				IOUtils.write("[", out);
-				toJSON(dataDir, out);
-				IOUtils.write("]", out);
-				IOUtils.closeQuietly(out);
-			}
-		}, MediaType.APPLICATION_JSON).build();
+		File dataDir = Configuration.getDataDir();
+		return Response.ok(new ResourcesStreamingOutput(dataDir),
+				MediaType.APPLICATION_JSON).build();
 	}
-
-	private void toJSON(File file, OutputStream out) throws IOException {
-		IOUtils.write("{", out);
-
-		IOUtils.write("\"title\":", out);
-		IOUtils.write("\"", out);
-		IOUtils.write(file.getName(), out);
-		IOUtils.write("\"", out);
-
-		IOUtils.write(",\"key\":", out);
-		IOUtils.write("\"", out);
-		IOUtils.write(file.getName(), out);
-		IOUtils.write("\"", out);
-
-		if (file.isDirectory()) {
-			IOUtils.write(", \"isFolder\":true", out);
-			IOUtils.write(", \"expand\":true", out);
-			IOUtils.write(", \"children\":[", out);
-
-			File[] files = file.listFiles();
-			for (int i = 0; i < files.length; i++) {
-				if (i > 0) {
-					IOUtils.write(",", out);
-				}
-				toJSON(files[i], out);
-			}
-
-			IOUtils.write("]", out);
-		}
-
-		IOUtils.write("}", out);
-	}
-
 }
