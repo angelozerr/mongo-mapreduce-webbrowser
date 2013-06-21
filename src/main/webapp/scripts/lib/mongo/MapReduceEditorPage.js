@@ -225,7 +225,7 @@ MapReduceEditorPage.prototype.save = function() {
   var _this = this;
   jQuery.ajax({
     type : 'GET',
-    url : url ,
+    url : url,
     data : {
       content : jsContent
     },
@@ -315,7 +315,7 @@ MapReduceEditorPage.prototype.createUI = function(parent) {
 
     // BSON textarea
     var textareaParent = document.createElement('div');
-    var bsonEditor = new BSONEditor(textareaParent, 'BSON document', true);
+    var bsonEditor = new MMRWB.BSONEditor(textareaParent, 'BSON document', true);
     if (defaultDocument != null) {
       bsonEditor.setValue(JSON.stringify(defaultDocument, null, ''));
     }
@@ -335,7 +335,7 @@ MapReduceEditorPage.prototype.createUI = function(parent) {
     legend.appendChild(document.createTextNode('Map Function'));
     fieldset.appendChild(legend);
 
-    var mapEditor = new ScriptEditor(fieldset, executor, EDITOR_TYPE.Map);
+    var mapEditor = new MMRWB.ScriptEditor(fieldset, executor, EDITOR_TYPE.Map);
     if (defaultMapFunc != null) {
       mapEditor.setValue(defaultMapFunc);
     }
@@ -352,7 +352,8 @@ MapReduceEditorPage.prototype.createUI = function(parent) {
     legend.appendChild(document.createTextNode('Reduce Function'));
     fieldset.appendChild(legend);
 
-    var reduceEditor = new ScriptEditor(fieldset, executor, EDITOR_TYPE.Reduce);
+    var reduceEditor = new MMRWB.ScriptEditor(fieldset, executor,
+        EDITOR_TYPE.Reduce);
     if (defaultReduceFunc != null) {
       reduceEditor.setValue(defaultReduceFunc);
     }
@@ -369,7 +370,7 @@ MapReduceEditorPage.prototype.createUI = function(parent) {
     legend.appendChild(document.createTextNode('Finalize Function'));
     fieldset.appendChild(legend);
 
-    var finalizeEditor = new ScriptEditor(fieldset, executor,
+    var finalizeEditor = new MMRWB.ScriptEditor(fieldset, executor,
         EDITOR_TYPE.Finalize);
     if (defaultFinalizeFunc != null) {
       finalizeEditor.setValue(defaultFinalizeFunc);
@@ -383,7 +384,7 @@ MapReduceEditorPage.prototype.createUI = function(parent) {
     table.appendChild(tr);
     parent.appendChild(table);
 
-    var resultEditor = new BSONEditor(parent, 'Result', false);
+    var resultEditor = new MMRWB.BSONEditor(parent, 'Result', false);
     executor.resultEditor = resultEditor;
 
   }

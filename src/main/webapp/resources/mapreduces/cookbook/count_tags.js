@@ -17,4 +17,23 @@ ${namespace}.reduceFunc=function (previous, current) {
 
     return count;
 }
-${namespace}.document=[{"title":"A blog post","author":"Kristina","content":"...","tags":["MongoDB","Map/Reduce","Recipe"]},{"title":"A second blog post","author":"Blablabla","content":"...","tags":["Map/Reduce"]}]
+${namespace}.document=[
+ {
+  "title": "A blog post",
+  "author": "Kristina",
+  "content": "...",
+  "tags": [
+   "kkkkkkkkkkkkkkkkkk",
+   "Map/Reduce",
+   "Recipe"
+  ]
+ },
+ {
+  "title": "A second blog post",
+  "author": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+  "content": "...",
+  "tags": [
+   "Map/Reduce"
+  ]
+ }
+]

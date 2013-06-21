@@ -1,164 +1,149 @@
-/**
- * Creates a new BSONEditor.
- * 
- * @param parent
- *          HTML element parent where the editor should be added.
- * @constructor
- */
-function BSONEditor(parent, titleLabel, editable) {
-  this.editable = editable;
-  this.bsonTextarea = this._createUI(parent, titleLabel, editable);
-};
+var MMRWB = {};
 
-/**
- * Create the UI.
- */
-BSONEditor.prototype._createUI = function(parent, titleLabel, /* Boolean */
-editable) {
+(function() {
+  "use strict";
 
-  var toolbarDiv = document.createElement('div');
-  // title
-  var title = document.createElement('span');
-  title.className = "title-editor";
-  title.appendChild(document.createTextNode(titleLabel));
-  toolbarDiv.appendChild(title);
+  function createUI(parent, titleLabel, /* Boolean */editable) {
 
-  // Format button
-  var _this = this;
-  var formatButton = document.createElement('input');
-  formatButton.type = 'button';
-  formatButton.value = 'Format';
-  formatButton.onclick = function() {
-    _this.format();
-  };
-  toolbarDiv.appendChild(formatButton);
+    var toolbarDiv = document.createElement('div');
+    // title
+    var title = document.createElement('span');
+    title.className = "title-editor";
+    title.appendChild(document.createTextNode(titleLabel));
+    toolbarDiv.appendChild(title);
 
-  // URL field
-  var hasURLField = false;
-  if (hasURLField) {
-    var urlInput = document.createElement('input');
-    urlInput.type = 'text';
-    toolbarDiv.appendChild(urlInput);
+    // Format button
+    var formatButton = document.createElement('input');
+    formatButton.type = 'button';
+    formatButton.value = 'Format';    
+    toolbarDiv.appendChild(formatButton);
 
-    var loadBSON = function() {
-      alert(urlInput.value);
+    // URL field
+    var hasURLField = false;
+    if (hasURLField) {
+      var urlInput = document.createElement('input');
+      urlInput.type = 'text';
+      toolbarDiv.appendChild(urlInput);
+
+      var loadBSON = function() {
+        alert(urlInput.value);
+      };
+
+      var urlDropdown = document.createElement('a');
+      urlDropdown.href = "#";
+      urlDropdown.onclick = loadBSON;
+      urlDropdown.appendChild(document.createTextNode("OK"));
+      toolbarDiv.appendChild(urlDropdown);
+    }
+    parent.appendChild(toolbarDiv);
+
+    var containerDiv = document.createElement('div');
+    containerDiv.className = "bson-editor-container";
+
+    var bsonTextarea = document.createElement('textarea');
+    containerDiv.appendChild(bsonTextarea);
+    parent.appendChild(containerDiv);
+
+    return {'textarea': bsonTextarea, 'formatButton' : formatButton}; 
+  }
+
+  MMRWB.BSONEditor = function(parent, titleLabel, editable) {
+    this.editable = editable;
+    var result = createUI(parent, titleLabel, editable);
+    this.bsonTextarea = result.textarea;
+    var formatButton = result.formatButton;
+    var self = this;
+    formatButton.onclick = function() {
+      self.format();
     };
-
-    var urlDropdown = document.createElement('a');
-    urlDropdown.href = "#";
-    urlDropdown.onclick = loadBSON;
-    urlDropdown.appendChild(document.createTextNode("OK"));
-    toolbarDiv.appendChild(urlDropdown);
   }
-  parent.appendChild(toolbarDiv);
 
-  var containerDiv = document.createElement('div');
-  containerDiv.className = "bson-editor-container";
+  MMRWB.BSONEditor.prototype = {
 
-  var bsonTextarea = document.createElement('textarea');
-  // bsonTextarea.setAttribute("rows", "10");
-  // bsonTextarea.setAttribute("cols", "150");
-  containerDiv.appendChild(bsonTextarea);
-  parent.appendChild(containerDiv);
+    setValue : function(value) {
+      if (this.codeMirror) {
+        this.codeMirror.setValue(value)
+      } else {
+        this.bsonTextarea.value = value;
+      }
+    },
 
-  return bsonTextarea;
-};
+    getValue : function() {
+      return this.codeMirror.getValue();
+    },
 
-/**
- * Set value of the editor.
- * 
- * @param value
- *          the value to set.
- */
-BSONEditor.prototype.setValue = function(value) {
-  if (this.codeMirror) {
-    this.codeMirror.setValue(value)
-  } else {
-    this.bsonTextarea.value = value;
-  }
-};
+    addChangeListener : function(changeListener) {
+      var _this = this;
+      this.changeListener = function() {
+        if (!_this.dontFireChangeEevent) {
+          changeListener();
+        }
+      }
+    },
 
-/**
- * Returns the value of the editor.
- * 
- * @returns the value of the editor.
- */
-BSONEditor.prototype.getValue = function() {
-  return this.codeMirror.getValue();
-};
+    format : function() {
+      try {
+        this.dontFireChangeEevent = true;
+        this.setValue(formatter.formatJson(this.getValue(), ' '));
+      } catch (e) {
 
-/**
- * Add the given changed listener.
- */
-BSONEditor.prototype.addChangeListener = function(changeListener) {
-  var _this = this;
-  this.changeListener = function() {
-    if (!_this.dontFireChangeEevent) {
-      changeListener();
+      } finally {
+        this.dontFireChangeEevent = false;
+      }
+    },
+
+    getBSON : function() {
+      var jsonData = this.getValue();
+      var array = BSON.parseStrict(jsonData);
+      if (array.length) {
+        this.bsonObject = array[0];
+      }
+      return array;
+    },
+
+    onAfterUI : function() {
+
+      function myJsonValidator(text) {
+        if (text == '') {
+          return [];
+        }
+        return CodeMirror.jsonValidator(text);
+      }
+
+      this.codeMirror = CodeMirror.fromTextArea(this.bsonTextarea, {
+        mode : 'application/json',
+        lineNumbers : true,
+        styleActiveLine : true,
+        lineWrapping : true,
+        matchBrackets : true,
+        autoCloseBrackets : true,
+        gutters : [ "CodeMirror-lint-markers", "CodeMirror-linenumbers" ],
+        lintWith : myJsonValidator
+      })
+      var editor = this.codeMirror;
+
+      var _this = this;
+      var onEditorChanged = function() {
+        if (_this.changeListener) {
+          _this.changeListener();
+        }
+      };
+
+      var waiting;
+      editor.on("change", function() {
+        _this.bsonObject = null;
+        clearTimeout(waiting);
+        waiting = setTimeout(onEditorChanged, 500);
+      });
+
+    },
+
+    getFirstBSONObject : function() {
+      if (this.bsonObject == null) {
+        this.getBSON();
+      }
+      return this.bsonObject;
     }
   }
-};
 
-BSONEditor.prototype.format = function() {
-  try {
-    this.dontFireChangeEevent = true;
-    this.setValue(formatter.formatJson(this.getValue(), ' '));
-  } catch (e) {
-
-  } finally {
-    this.dontFireChangeEevent = false;
-  }
-};
-
-BSONEditor.prototype.getBSON = function() {
-  var jsonData = this.getValue();
-  var array = BSON.parseStrict(jsonData);
-  if (array.length) {
-    this.bsonObject = array[0];
-  }
-  return array;
-};
-
-BSONEditor.prototype.onAfterUI = function() {
-
-  function myJsonValidator(text) {
-    if (text == '') {
-      return [];
-    }
-    return CodeMirror.jsonValidator(text);
-  }
-
-  this.codeMirror = CodeMirror.fromTextArea(this.bsonTextarea, {
-    mode : 'application/json',
-    lineNumbers : true,
-    styleActiveLine : true,
-    lineWrapping : true,
-    matchBrackets : true,
-    autoCloseBrackets : true,
-    gutters : [ "CodeMirror-lint-markers", "CodeMirror-linenumbers" ],
-    lintWith : myJsonValidator
-  })
-  var editor = this.codeMirror;
-
-  var _this = this;
-  var onEditorChanged = function() {
-    if (_this.changeListener) {
-      _this.changeListener();
-    }
-  };
-
-  var waiting;
-  editor.on("change", function() {
-    this.bsonObject = null;
-    clearTimeout(waiting);
-    waiting = setTimeout(onEditorChanged, 500);
-  });
-
-};
-
-BSONEditor.prototype.getFirstBSONObject = function() {
-  if (this.bsonObject == null) {
-    this.getBSON();
-  }
-  return this.bsonObject;
-};
+})();
