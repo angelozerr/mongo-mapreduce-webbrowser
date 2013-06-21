@@ -220,12 +220,13 @@ MapReduceEditorPage.prototype.save = function() {
     jsContent += '\n' + documentName + '=' + executor.bsonEditor.getValue();
   }
 
+  fileName = fileName.replace(/\//g, '%2F');
+  var url = SERVICE_SAVE_BASE_URL + fileName;
   var _this = this;
   jQuery.ajax({
     type : 'GET',
-    url : SERVICE_SAVE_BASE_URL,
+    url : url ,
     data : {
-      fileName : fileName,
       content : jsContent
     },
     success : function(data, textStatus, jqXHR) {
