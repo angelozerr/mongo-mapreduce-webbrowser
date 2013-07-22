@@ -67,7 +67,7 @@ var EDITOR_TYPE = {
       function toJSONMeta(jsonObj) {
         var meta = '{';
         var i = 0;
-        for (k in jsonObj) {
+        for (var k in jsonObj) {
           if (i > 0)
             meta += ',';
           meta += '"';
@@ -92,7 +92,7 @@ var EDITOR_TYPE = {
             } else if (Object.prototype.toString.apply(v) === '[object Array]') {
               meta += '[';
               var length = v.length;
-              for (j = 0; j < length; j++) {
+              for (var j = 0; j < length; j++) {
                 meta += toJSONMeta(v[j]);
               }
               meta += ']';
@@ -112,8 +112,8 @@ var EDITOR_TYPE = {
       function getText(cm) {
         if (_this.type == EDITOR_TYPE.Map) {
           var jsonObj = _this.executor.bsonEditor.getFirstBSONObject();
-          json = toJSONMeta(jsonObj);
-          return "var f=" + cm.getValue() + "f.apply(" + json + ")";
+          var json = toJSONMeta(jsonObj);
+          return cm.getValue() + ".apply(" + json + ")";
         }
         return cm.getValue();
       }
@@ -126,7 +126,9 @@ var EDITOR_TYPE = {
       }
 
       function myHint(cm) {
-        return CodeMirror.showHint(cm, CodeMirror.ternHints, {
+    	var server = CodeMirror.tern.getServer(cm);
+        server.delDoc('[doc]');
+        return CodeMirror.showHint(cm, CodeMirror.ternHint, {
           async : true
         });
       }

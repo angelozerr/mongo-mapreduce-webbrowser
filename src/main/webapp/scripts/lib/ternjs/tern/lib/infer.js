@@ -65,8 +65,9 @@
     addType: function(type, weight) {
       weight = weight || WG_DEFAULT;
       if (this.maxWeight < weight) {
-        this.types.length = 0;
         this.maxWeight = weight;
+        if (this.types.length == 1 && this.types[0] == type) return;
+        this.types.length = 0;
       } else if (this.maxWeight > weight || this.types.indexOf(type) > -1) {
         return;
       }
@@ -229,12 +230,12 @@
     }
   });
 
-  var PropHasSubset = exports.PropHasSubset = constraint("prop, target, originNode", {
+  var PropHasSubset = exports.PropHasSubset = constraint("prop, type, originNode", {
     addType: function(type, weight) {
       if (!(type instanceof Obj)) return;
       var prop = type.defProp(this.prop, this.originNode);
       prop.origin = this.origin;
-      this.target.propagate(prop, weight);
+      this.type.propagate(prop, weight);
     },
     propHint: function() { return this.prop; }
   });
@@ -246,16 +247,18 @@
     }
   });
 
-  var disabledComputing = null;
   function withDisabledComputing(fn, body) {
-    disabledComputing = {fn: fn, prev: disabledComputing};
-    try { return body(); } finally { disabledComputing = disabledComputing.prev; }
+    cx.disabledComputing = {fn: fn, prev: cx.disabledComputing};
+    try {
+      return body();
+    } finally {
+      cx.disabledComputing = cx.disabledComputing.prev;
+    }
   }
-
   var IsCallee = exports.IsCallee = constraint("self, args, argNodes, retval", {
     init: function() {
       Constraint.prototype.init();
-      this.disabled = disabledComputing;
+      this.disabled = cx.disabledComputing;
     },
     addType: function(fn, weight) {
       if (!(fn instanceof Fn)) return;
@@ -265,7 +268,8 @@
       }
       this.self.propagate(fn.self, this.self == cx.topScope ? WG_GLOBAL_THIS : weight);
       var compute = fn.computeRet;
-      if (compute) for (var d = this.disabled; d; d = d.prev) if (d.fn == fn) compute = null;
+      if (compute) for (var d = this.disabled; d; d = d.prev)
+        if (d.fn == fn || fn.name && d.fn.name == fn.name) compute = null;
       if (compute)
         compute(this.self, this.args, this.argNodes).propagate(this.retval, weight);
       else
@@ -282,8 +286,14 @@
   });
 
   var HasMethodCall = constraint("propName, args, argNodes, retval", {
+    init: function() {
+      Constraint.prototype.init();
+      this.disabled = cx.disabledComputing;
+    },
     addType: function(obj, weight) {
-      obj.getProp(this.propName).propagate(new IsCallee(obj, this.args, this.argNodes, this.retval), weight);
+      var callee = new IsCallee(obj, this.args, this.argNodes, this.retval);
+      callee.disabled = this.disabled;
+      obj.getProp(this.propName).propagate(callee, weight);
     },
     propHint: function() { return this.propName; }
   });
@@ -296,7 +306,7 @@
   });
 
   var getInstance = exports.getInstance = function(obj, ctor) {
-    if (ctor == false) return new Obj(obj);
+    if (ctor === false) return new Obj(obj);
 
     if (!ctor) ctor = obj.hasCtor;
     if (!obj.instances) obj.instances = [];
@@ -313,6 +323,7 @@
   var IsProto = exports.IsProto = constraint("ctor, target", {
     addType: function(o, _weight) {
       if (!(o instanceof Obj)) return;
+      if ((this.count = (this.count || 0) + 1) > 8) return;
       if (o == cx.protos.Array)
         this.target.addType(new Arr);
       else
@@ -322,8 +333,14 @@
 
   var FnPrototype = constraint("fn", {
     addType: function(o, _weight) {
-      if (o instanceof Obj && !o.hasCtor)
+      if (o instanceof Obj && !o.hasCtor) {
         o.hasCtor = this.fn;
+        var adder = new SpeculativeThis(o, this.fn);
+        adder.addType(this.fn);
+        o.forAllProps(function(_prop, val, local) {
+          if (local) val.propagate(adder);
+        });
+      }
     }
   });
 
@@ -344,12 +361,11 @@
     propagatesTo: function() { return this.target; }
   });
 
-  var AutoInstance = constraint("target", {
-    addType: function(tp, weight) {
-      if (tp instanceof Obj && tp.name && /\.prototype$/.test(tp.name))
-        getInstance(tp).propagate(this.target, weight);
-    },
-    propagatesTo: function() { return this.target; }
+  var SpeculativeThis = constraint("obj, ctor", {
+    addType: function(tp) {
+      if (tp instanceof Fn && tp.self && tp.self.isEmpty())
+        tp.self.addType(getInstance(this.obj, this.ctor), WG_SPECULATIVE_THIS);
+    }
   });
 
   var Muffle = constraint("inner, weight", {
@@ -582,6 +598,7 @@
     this.definitions = Object.create(null);
     this.purgeGen = 0;
     this.workList = null;
+    this.disabledComputing = null;
 
     exports.withContext(this, function() {
       cx.protos.Object = new Obj(null, "Object.prototype");
@@ -674,10 +691,12 @@
 
   function maybeTagAsInstantiated(node, scope) {
     var score = scope.fnType.instantiateScore;
-    if (score && nodeSmallerThan(node, score * 5)) {
+    if (!cx.disabledComputing && score && scope.fnType.args.length && nodeSmallerThan(node, score * 5)) {
       maybeInstantiate(scope.prev, score / 2);
       setFunctionInstantiated(node, scope);
       return true;
+    } else {
+      scope.fnType.instantiateScore = null;
     }
   }
 
@@ -807,11 +826,6 @@
     return "<i>";
   }
 
-  function maybeMethod(node, obj) {
-    if (node.type != "FunctionExpression") return;
-    obj.propagate(new AutoInstance(node.body.scope.fnType.self), WG_SPECULATIVE_THIS);
-  }
-
   function unopResultType(op) {
     switch (op) {
     case "+": case "-": case "~": return cx.num;
@@ -878,7 +892,6 @@
         var val = obj.defProp(name, key);
         val.initializer = true;
         infer(prop.value, scope, c, val, name);
-        maybeMethod(prop.value, obj);
       }
       return obj;
     }),
@@ -938,7 +951,6 @@
 
       if (node.left.type == "MemberExpression") {
         var obj = infer(node.left.object, scope, c);
-        if (!obj.hasType(cx.topScope)) maybeMethod(node.right, obj);
         if (pName == "prototype") maybeInstantiate(scope, 20);
         if (pName == "<i>") {
           // This is a hack to recognize for/in loops that copy
@@ -1009,11 +1021,6 @@
       var name = propName(node, scope);
       var obj = infer(node.object, scope, c);
       var prop = obj.getProp(name);
-      if (name == "prototype") {
-        var ctor = obj.getType();
-        if (ctor instanceof Fn && ctor.self.isEmpty())
-          prop.propagate(new AutoInstance(ctor.self), WG_SPECULATIVE_THIS);
-      }
       if (name == "<i>") {
         var propType = infer(node.property, scope, c);
         if (!propType.hasType(cx.num)) {

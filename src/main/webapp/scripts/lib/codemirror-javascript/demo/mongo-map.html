@@ -33,14 +33,16 @@
   <script src="../../ternjs/tern/lib/comment.js"></script>
   <script src="../../ternjs/tern/lib/infer.js"></script>
 
-  <!-- CodeMirror addon with Tern JS -->
-  <link rel="stylesheet" href="../addon/hint/tern/tern-hint.css">
-  <script src="../addon/hint/tern/tern-hint.js"></script>    
-  <script src="../addon/hint/tern/defs/ecma5.json.js"></script>
-  <script src="../addon/hint/tern/defs/browser.json.js"></script>
+  <!-- Official CodeMirror Tern addon -->
+  <script src="../../codemirror/addon/tern/tern.js"></script>   
 
-  <!-- CodeMirror Extension -->  
-  
+  <!-- Extension of CodeMirror Tern addon -->
+  <link rel="stylesheet" href="../addon/hint/tern/tern-extension.css">
+  <script src="../addon/hint/tern/tern-extension.js"></script>    
+  <script src="../addon/hint/tern/defs/ecma5.json.js"></script>
+  <script src="../addon/hint/tern/defs/mongo-map.json.js"></script>
+
+  <!-- CodeMirror Extension -->    
   <link rel="stylesheet" href="../../codemirror-extension/addon/hint/show-hint-eclipse.css">
   <script src="../../codemirror-extension/addon/hint/show-context-info.js"></script>
   <link rel="stylesheet" href="../../codemirror-extension/addon/hint/show-context-info.css">
@@ -64,7 +66,9 @@
     It uses 2 CodeMirror addons :
     </div>
     <ul>
-      <li><a href="../addon/hint/tern/tern-hint.js" >addon/hint/tern/tern-hint.js</a> is a CodeMirror addon to use Tern (completion about variables, methodes etc).
+      <li><a href="#" >"Official CodeMirror" addon/tern/tern.js</a> is a CodeMirror addon to use Tern (completion about variables, methodes etc).
+      </li>
+      <li><a href="../addon/hint/tern/tern-extension.js" >addon/hint/tern/tern-extension.js</a> extends the CodeMirror Tern addon to display/insert signature functions.
       </li>
       <li><a href="../addon/hint/javascript/javascript-templates.js" >addon/hint/javascript/javascript-templates.js</a> is a CodeMirror addon to manage javascript 
       (Eclipse like) templates completions (snippets).
@@ -74,6 +78,8 @@
 	<form><textarea id="json" name="json" >{"_id":{"$oid":"50d8fdedadd222278ba9090f"}, "astring" : "xxxx", "adate" : {"$date":"2012-12-25T01:14:21.312Z"}, "anumber" : 1, "aboolean" : true, "anarray" : [{"item":1}, {"item2":"ee"}]}
 	</textarea>
     <textarea id="code" name="code">function() {
+    var a = [];
+    a.
 	this.// Ctrl+Space
 }
 </textarea></form>
@@ -110,7 +116,7 @@
       }
       
       function myHint(cm) {
-      	return CodeMirror.showHint(cm, CodeMirror.ternHints, {async: true}); 
+      	return CodeMirror.showHint(cm, CodeMirror.ternHint, {async: true}); 
       }
      
       CodeMirror.commands.autocomplete = function(cm) {
@@ -118,10 +124,10 @@
       }
       
       function getText(cm) {
-        var jsonObj = BSON.parseStrict(document.getElementById('json').value);
+        var jsonObj = BSON.parseStrict(jsonEditor.getValue());
         json = toJSONMeta(jsonObj);        
-      	var obj = "var arr = " + json; 
-      	return "var f=" + cm.getValue() + "f.apply(" + obj + ")"; 
+      	//return "var f=" + cm.getValue() + "f.apply(" + json + ")"; 
+      	return cm.getValue() + ".apply(" + json + ")";
       	
       }    
       
@@ -134,6 +140,11 @@
         matchBrackets: true,
         gutters: ["CodeMirror-lint-markers", "CodeMirror-linenumbers"],
     	lintWith: CodeMirror.jsonValidator
+      });
+      
+      CodeMirror.on(jsonEditor, 'change', function(cm) {
+        var server = CodeMirror.tern.getServer(editor);
+        server.delDoc('[doc]');
       });
       
       function toJSONMeta(jsonObj) {
