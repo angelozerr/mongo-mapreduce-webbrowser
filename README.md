@@ -1,7 +1,10 @@
 # Overview
 
-**Mongo MapReduce WebBrowser (MMW)** is a Web application which gives you the capability to **write, test (quickly) and debug with breakpoints 
-your MapReduce with your Web Browser**.
+**Mongo MapReduce WebBrowser (MMW)** is a Web application which gives you the capability to 
+
+ * **write** your MapReduce.
+ * **test (quickly)** your MapReduce by seeing the result.
+ * **debug with breakpoints** your MapReduce with your Web Browser.
 
 You can play with the  [live demo](http://mongo-mapreduce-webbrowser.opensagres.cloudbees.net/) or follow the [Installation Guide](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/Installation-Guide) to use the webapp on localhost.
 
@@ -12,9 +15,9 @@ You can play with the  [live demo](http://mongo-mapreduce-webbrowser.opensagres.
 **Mongo MapReduce WebBrowser (MMW)** provides advanced editor (syntax coloring, syntax errors, completions)
 to write your MapReduce. After creating an empty MapReduce : 
 
- * fill your BSON document (data array) with stricted syntax by using The BSON editor 
- * fill your Map by using the Map Editor.
- * fill your Reduce by using the Reduce Editor.
+ * fill your BSON document (data array) with stricted syntax by using The [BSON editor](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/BSON-Editor). 
+ * fill your Map by using the [Map Editor](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/Map-Editor).
+ * fill your Reduce by using the [Reduce Editor](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/Reduce-Editor).
 
 
 And see the result of your MapReduce execution on fly time : 
