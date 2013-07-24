@@ -19,6 +19,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
+import java.util.Arrays;
 
 import fr.opensagres.mapreduce.webbrowser.utils.JsonUtils;
 
@@ -53,6 +54,8 @@ public class Serializer {
 
 			// Loop for files
 			File[] files = file.listFiles();
+			// Sort the files by name.
+			Arrays.sort(files);
 			for (int i = 0; i < files.length; i++) {
 				if (i > 0) {
 					writer.write(",");
