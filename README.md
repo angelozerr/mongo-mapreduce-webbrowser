@@ -3,7 +3,7 @@
 **Mongo MapReduce WebBrowser** is a Web application which gives you the capability to **write, test (quickly) and debug with breakpoints 
 your MapReduce with your Web Browser**.
 
-See [live demo](http://mongo-mapreduce-webbrowser.opensagres.cloudbees.net/).
+You can play with the  [live demo](http://mongo-mapreduce-webbrowser.opensagres.cloudbees.net/) or follow the [Installation Guide](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/Installation-Guide) to use the webapp on localhost.
 
 # Features
 
