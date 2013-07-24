@@ -54,7 +54,7 @@ public class Serializer {
 
 			// Loop for files
 			File[] files = file.listFiles();
-			// Sort the files by name.
+			// Sort the files by name. 
 			Arrays.sort(files);
 			for (int i = 0; i < files.length; i++) {
 				if (i > 0) {
