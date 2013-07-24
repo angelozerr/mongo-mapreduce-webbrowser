@@ -15,7 +15,7 @@ You can play with the  [live demo](http://mongo-mapreduce-webbrowser.opensagres.
 **Mongo MapReduce WebBrowser (MMW)** provides advanced editor (syntax coloring, syntax errors, completions)
 to [write your MapReduce](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/Writing-MapReduce): 
 
- * fill the  BSON document (data array) with [strict mode](http://docs.mongodb.org/manual/reference/mongodb-extended-json/) syntax by using The [BSON editor](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/BSON-Editor). 
+ * fill the  BSON document (data array) with [strict mode](http://docs.mongodb.org/manual/reference/mongodb-extended-json/) syntax by using The [BSON editor](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/Writing-MapReduc#bson-editor).
  * fill the Map function by using the [Map Editor](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/Map-Editor).
  * fill the Reduce function by using the [Reduce Editor](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/Reduce-Editor).
 
