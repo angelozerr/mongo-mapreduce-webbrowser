@@ -30,14 +30,15 @@ As MapReduce is executed with WebBrowser, it's possible to use the WebBrowser de
 
 ![MapReduce Debug](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/images/Count_Tags_Debug.png)
 
-# Supported Web Browsers
-
-Tested with Chrome and FF (some problems with IE).
 
 # Installation
 
-See [Installation Guide](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/Installation-Guide)
+To install on your localhost the webapp, please read [Installation Guide](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/Installation-Guide)
 
+
+# Supported Web Browsers
+
+Tested with Chrome and FF (some problems with IE).
 
 # Build
 
