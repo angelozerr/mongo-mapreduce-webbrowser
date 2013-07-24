@@ -16,8 +16,8 @@ You can play with the  [live demo](http://mongo-mapreduce-webbrowser.opensagres.
 to [write your MapReduce](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/Writing-MapReduce): 
 
  * fill the  BSON document (data array) with [strict mode](http://docs.mongodb.org/manual/reference/mongodb-extended-json/) syntax by using the [BSON editor](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/BSON-Editor).
- * fill the Map function by using the [Map Editor](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/Map-Editor).
- * fill the Reduce function by using the [Reduce Editor](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/Reduce-Editor).
+ * fill the Map function by using the [Map Editor](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/MapReduce-Editor).
+ * fill the Reduce function by using the [Reduce Editor](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/MapReduce-Editor).
 
 
 And see the result of your MapReduce execution on fly time : 
