@@ -10,7 +10,7 @@ You can play with the  [live demo](http://mongo-mapreduce-webbrowser.opensagres.
 
 # Features
 
-## Writing your MapReduce
+## Writing MapReduce
 
 **Mongo MapReduce WebBrowser (MMW)** provides advanced editor (syntax coloring, syntax errors, completions)
 to [write your MapReduce](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/Develop-MapReduce): 
@@ -26,14 +26,18 @@ And see the result of your MapReduce execution on fly time :
 
 ## Debugging MapReduce
 
-Use the debugger tools of your preffered WebBrowser to set breakpoint in your MapReduce to debug it. 
-Here a screen with Chrome Dev Tools : 
+As MapReduce is executed with WebBrowser, it's possible to use the WebBrowser debugger to debug MapReduce with breakpoints. Here a screen with Chrome Dev Tools : 
 
 ![MapReduce Debug](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/images/Count_Tags_Debug.png)
+
+# Supported Web Browsers
+
+Tested with Chrome and FF (some problems with IE).
 
 # Installation
 
 See [Installation Guide](https://github.com/angelozerr/mongo-mapreduce-webbrowser/wiki/Installation-Guide)
+
 
 # Build
 
