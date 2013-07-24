@@ -117,7 +117,17 @@ var MMRWB = {};
         lineWrapping : true,
         matchBrackets : true,
         autoCloseBrackets : true,
+        showCursorWhenSelecting : true,
         gutters : [ "CodeMirror-lint-markers", "CodeMirror-linenumbers" ],
+	extraKeys : {
+	    "F11" : function(cm) {
+		setFullScreen(cm, !isFullScreen(cm));
+	    },
+	    "Esc" : function(cm) {
+		if (isFullScreen(cm))
+		    setFullScreen(cm, false);
+	    }
+	},
         lintWith : myJsonValidator
       })
       var editor = this.codeMirror;

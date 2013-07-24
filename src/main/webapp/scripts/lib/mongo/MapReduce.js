@@ -62,6 +62,36 @@ MR.doMapReduce = function(jsonArray, mapFunc, reduceFunc, finalizeFunc) {
 	return reduceResult;
 };
 
+MR.getMapData = function(jsonArray, mapFunc) {
+	MR.cleanup();
+
+	var oldPrint = window.print;
+	try {
+
+		window.print = MR.print;
+
+		// 1) Map step
+		var jsonObject = null;
+		for ( var idx = 0; idx < jsonArray.length; idx++) {
+			jsonObject = jsonArray[idx];
+			mapFunc.call(jsonObject);
+		}
+
+		// 2) Reduce step
+		for ( var i = 0; i < $arr.length; i++) {
+			var data = $arr[i];
+			if (!data)
+				continue;
+			return data;
+		}
+	} catch (e) {
+		throw e;
+	} finally {
+		window.print = oldPrint;
+	}
+	return null;
+}
+
 MR.init = function() {
 	$max = 0;
 	$arr = [];
@@ -322,9 +352,9 @@ MR.print = function(txt) {
 	}
 };
 
-//Array.prototype.max = function() {
-//	return Math.max.apply({}, this)
-//}
-//Array.prototype.min = function() {
-//	return Math.min.apply({}, this)
-//}
+// Array.prototype.max = function() {
+// return Math.max.apply({}, this)
+// }
+// Array.prototype.min = function() {
+// return Math.min.apply({}, this)
+// }

@@ -11,72 +11,91 @@ var SubMapReduceExecutor = (function() {
 
 })();
 
-SubMapReduceExecutor.prototype.execute = function(index) {
+SubMapReduceExecutor.prototype = {
+		
+  execute : function(index) {
 
-  var namespace = this.ownerExecutor.namespaceName;
-  var mapFuncName = namespace + '.mapFunc';
-  var reduceFuncName = namespace + '.reduceFunc';
-
-  var _this = this;
-  var errorCallback = function(message) {
-    _this.ownerExecutor.setError(message);
-    _this.resultEditor.setValue(message);
-  };
-
-  var jsonArray = null;
-  try {
-    jsonArray = this.bsonEditor.getBSON();
-  } catch (e) {
-    errorCallback('Error BSON: ' + e);
-    return;
-  }
-
-  var dirty = this.ownerExecutor.isDirty();
-  if (dirty) {
-    try {
-      eval('if(!' + namespace + '){var ' + namespace + '={};}' + mapFuncName
-          + '=' + this.mapEditor.getValue());
-    } catch (e) {
-      errorCallback('Error Map: ' + e);
-      return;
-    }
-
-    try {
-      eval(reduceFuncName + '=' + this.reduceEditor.getValue());
-    } catch (e) {
-      errorCallback('Error Reduce: ' + e);
-      return;
-    }
-  }
-
-  // Finalize
-  var finalizeFuncName = null;
-  var finalizeContent = this.finalizeEditor.getValue();
-  if (finalizeContent != '') {
-    finalizeFuncName = namespace + '.finalizeFunc';
-    if (dirty) {
-      try {
-        eval(finalizeFuncName + '=' + finalizeContent);
-      } catch (e) {
-        errorCallback('Error Finalize: ' + e);
-        return;
-      }
-    }
-  }
-
-  try {
-    var finalizeFunc = null;
-    if (finalizeFuncName != null) {
-      finalizeFunc = eval(finalizeFuncName);
-    }
-    var reduceResult = MR.doMapReduce(jsonArray, eval(mapFuncName),
-        eval(reduceFuncName), finalizeFunc);
-    var json = BSON.toString(reduceResult, null, '  ');
-    this.resultEditor.setValue(json);
-  } catch (e) {
-    errorCallback('Error while executing MapReduce: ' + e);
-    return;
-  }
+	  var namespace = this.ownerExecutor.namespaceName;
+	  var mapFuncName = namespace + '.mapFunc';
+	  var reduceFuncName = namespace + '.reduceFunc';
+	
+	  var _this = this;
+	  var errorCallback = function(message) {
+	    _this.ownerExecutor.setError(message);
+	    _this.resultEditor.setValue(message);
+	  };
+	
+	  var jsonArray = null;
+	  try {
+	    jsonArray = this.bsonEditor.getBSON();
+	  } catch (e) {
+	    errorCallback('Error BSON: ' + e);
+	    return;
+	  }
+	
+	  var dirty = this.ownerExecutor.isDirty();
+	  if (dirty) {
+	    try {
+	      eval('if(!' + namespace + '){var ' + namespace + '={};}' + mapFuncName
+	          + '=' + this.mapEditor.getValue());
+	    } catch (e) {
+	      errorCallback('Error Map: ' + e);
+	      return;
+	    }
+	
+	    try {
+	      eval(reduceFuncName + '=' + this.reduceEditor.getValue());
+	    } catch (e) {
+	      errorCallback('Error Reduce: ' + e);
+	      return;
+	    }
+	  }
+	
+	  // Finalize
+	  var finalizeFuncName = null;
+	  var finalizeContent = this.finalizeEditor.getValue();
+	  if (finalizeContent != '') {
+	    finalizeFuncName = namespace + '.finalizeFunc';
+	    if (dirty) {
+	      try {
+	        eval(finalizeFuncName + '=' + finalizeContent);
+	      } catch (e) {
+	        errorCallback('Error Finalize: ' + e);
+	        return;
+	      }
+	    }
+	  }
+	
+	  try {
+	    var finalizeFunc = null;
+	    if (finalizeFuncName != null) {
+	      finalizeFunc = eval(finalizeFuncName);
+	    }
+	    var reduceResult = MR.doMapReduce(jsonArray, eval(mapFuncName),
+	        eval(reduceFuncName), finalizeFunc);
+	    var json = BSON.toString(reduceResult, null, '  ');
+	    this.resultEditor.setValue(json);
+	  } catch (e) {
+	    errorCallback('Error while executing MapReduce: ' + e);
+	    return;
+	  }
+  },
+  
+  getMapData : function() {
+	 try {
+		var namespace = this.ownerExecutor.namespaceName;
+		var mapFuncName = namespace + '.mapFunc';
+	    var jsonArray = this.bsonEditor.getBSON();
+	    var dirty = this.ownerExecutor.isDirty();
+	    if (dirty) {
+	      eval('if(!' + namespace + '){var ' + namespace + '={};}' + mapFuncName
+	          + '=' + this.mapEditor.getValue());
+	    }
+	    return MR.getMapData(jsonArray, eval(mapFuncName));	    
+	  } catch (e) {	    
+	    return null;
+	  }	
+  }  
 };
 
 var MapReduceEditorPage = (function() {
