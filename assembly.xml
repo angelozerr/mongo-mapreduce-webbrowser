@@ -24,14 +24,14 @@
 	<dependencySets>
 		<dependencySet>
 			<unpack>true</unpack>
-			<outputDirectory>webapp</outputDirectory>
+			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>*:war</include>
 			</includes>
 		</dependencySet>
 		<dependencySet>
 			<excludes>
-			<exclude>fr.opensagres:*:*</exclude>
+			<exclude>fr.opensagres.mapreduce.webbrowser:*:*</exclude>
 			</excludes>
 			<scope>provided</scope>
 			<outputDirectory>/</outputDirectory>

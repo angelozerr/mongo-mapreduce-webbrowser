@@ -12,11 +12,18 @@
 package bin;
 
 import java.awt.Desktop;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.security.ProtectionDomain;
 
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.util.resource.FileResource;
+import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 import fr.opensagres.mapreduce.webbrowser.Configuration;
@@ -46,7 +53,8 @@ public class StartServer {
 		URL location = domain.getCodeSource().getLocation();
 		WebAppContext webapp = new WebAppContext();
 		webapp.setContextPath(contextpath);
-		webapp.setWar(location.toExternalForm() + "/webapp");
+		webapp.setExtractWAR(true);
+		webapp.setWar(location.toExternalForm());
 		String dataDir = getDataDir(args);
 		if (isNotEmpty(dataDir)) {
 			webapp.setInitParameter(Configuration.DATA_DIR_KEY, dataDir);
