@@ -51,7 +51,7 @@
 				<artifactId>maven-license-plugin</artifactId>
 				<configuration>
 					<basedir>${basedir}</basedir>
-					<header>header.txt</header>
+					<header>license.txt</header>
 					<includes>
 						<include>src/**</include>
 						<include>**/test/**</include>
